@@ -1,4 +1,4 @@
-package org.example;
+package com.licoreria.app.modelo.pedidos;
 
 public enum EstadoPedido {
     PENDIENTE,

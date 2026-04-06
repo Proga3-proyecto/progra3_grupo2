@@ -1,4 +1,4 @@
-package org.example;
+package com.licoreria.app.modelo.usuarios;
 
 import java.util.Date;
 

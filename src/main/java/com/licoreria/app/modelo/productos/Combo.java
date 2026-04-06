@@ -1,4 +1,4 @@
-package org.example;
+package com.licoreria.app.modelo.productos;
 
 import java.util.List;
 
