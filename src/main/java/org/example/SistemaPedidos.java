@@ -1,0 +1,8 @@
+package org.example;
+
+import java.util.List;
+
+public class SistemaPedidos {
+    private List<Pedido> pedidos;
+    
+}

@@ -1,0 +1,11 @@
+package org.example;
+
+import java.util.List;
+
+public class Motorizado extends  Usuario{
+    private String placa;
+    private int horasTrabajo;
+    private List<Pedido> pedidosAsignados;
+    private double pagoMensual;
+    private List<Pedido> historialPedidos;
+}
