@@ -9,5 +9,4 @@ public class Motorizado extends Usuario {
     private int horasTrabajo;
     private List<Pedido> pedidosAsignados;
     private double pagoMensual;
-    private List<Pedido> historialPedidos;
 }
