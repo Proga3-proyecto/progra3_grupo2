@@ -13,8 +13,4 @@ public class Producto {
     private String imagenURL;
     private boolean paraCombos;
 
-    public static class SistemaPedidos {
-        private List<Pedido> pedidos;
-
-    }
 }

@@ -1,6 +1,6 @@
 package com.licoreria.app.modelo.productos;
 
-public class ElementoCombo {
+public class ElementoReceta {
     private Producto producto;
-    private int cantidad;
+    private double cantidad;
 }

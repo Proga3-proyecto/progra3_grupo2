@@ -2,9 +2,10 @@ package com.licoreria.app.modelo.productos;
 
 import java.util.List;
 
-public class Combo {
-    private int idCombo;
+public class Receta {
+    private int idReceta;
     private String nombre;
-    private List<ElementoCombo> preoductos;
+    private List<ElementoReceta> productos;
     private String descripcion;
+    private String imageSRC;
 }

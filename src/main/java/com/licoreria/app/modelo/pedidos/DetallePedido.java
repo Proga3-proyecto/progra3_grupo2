@@ -2,7 +2,5 @@ package com.licoreria.app.modelo.pedidos;
 
 public abstract class DetallePedido {
     private double descuentoTotal;
-    private double montoTOtal;
-    private int cantidad;
-
+    private double montoTotal;
 }

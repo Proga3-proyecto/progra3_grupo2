@@ -11,10 +11,9 @@ public class Pedido {
     private int idPedido;
     private Cliente cliente;
     private Motorizado motorizado;
-    private String  direccion;
     private Date fechaPedido;
-    private List<DetalleProducto> productos;
-    private List<DetalleCombo> combos;
+    private List<DetallePedido> detalles;
+    //private List<DetalleReceta> recetas;
     private LocalTime horaInicio;
     private LocalTime horaFin;
     private double precioTotal;
