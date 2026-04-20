@@ -61,7 +61,6 @@ public class PedidoDAOImpl implements PedidoDAO {
 
             ps.setLong(1, pedido.getCliente().getId());
 
-            // El motorizado puede ser null al crear el pedido (se asigna después)
             if (pedido.getMotorizado() != null && pedido.getMotorizado().getId() > 0) {
                 ps.setLong(2, pedido.getMotorizado().getId());
             } else {
@@ -140,21 +139,17 @@ public class PedidoDAOImpl implements PedidoDAO {
         }
     }
 
-    // --- MÉTODOS AUXILIARES ---
 
     private Pedido mapResultSetToPedido(ResultSet rs) throws SQLException {
         Pedido p = new Pedido();
         p.setIdPedido(rs.getLong("id_pedido"));
 
-        // Reconstruimos el Cliente (Solo con ID. En la capa de servicio puedes usar ClienteDAO para traerlo completo si lo necesitas)
         Cliente c = new Cliente();
         c.setId(rs.getLong("id_cliente"));
         p.setCliente(c);
 
-        // Reconstruimos el Motorizado si existe
         long idMotorizado = rs.getLong("id_motorizado");
         if (!rs.wasNull()) {
-            // El constructor de motorizado requiere muchos parámetros, usamos setters para instanciarlo rápido
             Motorizado m = new Motorizado(null, null, null, null, null, null, null, null, 0, 0);
             m.setId(idMotorizado);
             p.setMotorizado(m);
@@ -184,12 +179,10 @@ public class PedidoDAOImpl implements PedidoDAO {
             try {
                 p.setEstado(EstadoPedido.valueOf(estadoBD));
             } catch (IllegalArgumentException e) {
-                p.setEstado(EstadoPedido.PENDIENTE); // Fallback por defecto si hay un error en BD
+                p.setEstado(EstadoPedido.PENDIENTE);
             }
         }
 
-        // Nota: Los detalles (List<DetallePedido>) NO se cargan aquí para evitar consultas circulares masivas.
-        // Se deben cargar usando el DetalleProductoDAO y DetalleRecetaDAO desde tu controlador o servicio.
 
         return p;
     }
