@@ -1,6 +1,7 @@
 package com.licoreria.app.dao.motorizadoDAO;
 
 import com.licoreria.app.dao.conexionBD.ConexionDB;
+import com.licoreria.app.modelo.usuarios.EstadoCuenta;
 import com.licoreria.app.modelo.usuarios.Motorizado;
 
 import java.sql.*;
@@ -71,8 +72,8 @@ public class MotorizadoDAOImpl implements MotorizadoDAO {
                 psUsuario.setString(7, motorizado.getContraseniaHash());
                 psUsuario.setString(8, motorizado.getTelefono());
 
-                String estado = (motorizado.getEstadoString() != null) ? motorizado.getEstadoString() : "ACTIVA";
-                psUsuario.setString(9, estado);
+               // String estado = (motorizado.getEstadoString() != null) ? motorizado.getEstadoString() : "ACTIVA";
+                psUsuario.setString(9, motorizado.getEstado().name());
 
                 int affectedRows = psUsuario.executeUpdate();
                 if (affectedRows == 0) {
@@ -138,8 +139,7 @@ public class MotorizadoDAOImpl implements MotorizadoDAO {
                 psUsuario.setString(5, motorizado.getCorreo());
                 psUsuario.setString(6, motorizado.getTelefono());
 
-                String estado = (motorizado.getEstadoString() != null) ? motorizado.getEstadoString() : "ACTIVA";
-                psUsuario.setString(7, estado);
+                psUsuario.setString(7, motorizado.getEstado().name());
                 psUsuario.setString(8, motorizado.getContraseniaHash());
                 psUsuario.setLong(9, motorizado.getId());
 
@@ -213,7 +213,7 @@ public class MotorizadoDAOImpl implements MotorizadoDAO {
             m.setFechaCreacionCuenta(new java.util.Date(fechaCrea.getTime()));
         }
 
-        m.setEstado(rs.getString("estado"));
+        m.setEstado(EstadoCuenta.valueOf(rs.getString("estado")));
 
         return m;
     }

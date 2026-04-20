@@ -38,6 +38,7 @@ public abstract class Usuario {
         this.apellidoCompleto = apellidoCompleto;
         this.fechaNacimiento = fechaNacimiento;
         this.contraseniaHash = contraseniaHash;
+        this.estado = EstadoCuenta.ACTIVA;
     }
 
     public List<Pedido> getHistorialPedidos() {
@@ -124,35 +125,7 @@ public abstract class Usuario {
         return estado;
     }
 
-    public  String getEstadoString(){
-        switch (this.estado) {
-            case EstadoCuenta.ACTIVA:
-                return "ACTIVA";
-            case EstadoCuenta.INACTIVA:
-                return "INACTIVA";
-            case EstadoCuenta.SUSPENDIDA:
-                return "SUSPENDIDA";
-        }
-        return null;
-    }
-
     public void setEstado(EstadoCuenta estado) {
         this.estado = estado;
     }
-
-    public void setEstado(String s) {
-        switch (s) {
-            case "ACTIVA":
-                this.estado = EstadoCuenta.ACTIVA;
-                break;
-            case "INACTIVA":
-                this.estado = EstadoCuenta.INACTIVA;
-                break;
-            case "SUSPENDIDA":
-                this.estado = EstadoCuenta.SUSPENDIDA;
-                break;
-        }
-    }
-
-
 }

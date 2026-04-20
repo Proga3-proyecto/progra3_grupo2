@@ -2,6 +2,7 @@ package com.licoreria.app.dao.adminDAO;
 
 import com.licoreria.app.dao.conexionBD.ConexionDB;
 import com.licoreria.app.modelo.usuarios.Admin;
+import com.licoreria.app.modelo.usuarios.EstadoCuenta;
 import com.licoreria.app.utils.DateUtils;
 
 import java.sql.*;
@@ -68,9 +69,7 @@ public class AdminDAOImpl implements AdminDAO {
                 psUsuario.setString(6, admin.getCorreo());
                 psUsuario.setString(7, admin.getContraseniaHash());
                 psUsuario.setString(8, admin.getTelefono());
-
-                String estado = (admin.getEstadoString() != null) ? admin.getEstadoString() : "ACTIVA";
-                psUsuario.setString(9, estado);
+                psUsuario.setString(9, admin.getEstado().name());
 
                 int affectedRows = psUsuario.executeUpdate();
                 if (affectedRows == 0) {
@@ -84,7 +83,7 @@ public class AdminDAOImpl implements AdminDAO {
                         try (PreparedStatement psAdmin = conn.prepareStatement(insertAdmin)) {
                             psAdmin.setLong(1, idGenerado);
                             if (admin.getFechaInicioAdmin() != null) {
-                                psAdmin.setDate(2, new java.sql.Date(admin.getFechaInicioAdmin().getTime()));
+                                psAdmin.setDate(2, DateUtils.toSqlDate(admin.getFechaInicioAdmin()));
                             } else {
                                 psAdmin.setNull(2, java.sql.Types.DATE);
                             }
@@ -131,13 +130,10 @@ public class AdminDAOImpl implements AdminDAO {
                 psUsuario.setString(1, admin.getDni());
                 psUsuario.setString(2, admin.getNombre());
                 psUsuario.setString(3, admin.getApellidoCompleto());
-                psUsuario.setDate(4, admin.getFechaNacimiento() != null ? new java.sql.Date(admin.getFechaNacimiento().getTime()) : null);
+                psUsuario.setDate(4, DateUtils.toSqlDate(admin.getFechaNacimiento()));
                 psUsuario.setString(5, admin.getCorreo());
                 psUsuario.setString(6, admin.getTelefono());
-
-                String estado = (admin.getEstado() != null) ? admin.getEstado().toString() : "ACTIVA";
-                psUsuario.setString(7, estado);
-
+                psUsuario.setString(7, admin.getEstado().name());
                 psUsuario.setString(8, admin.getContraseniaHash());
                 psUsuario.setLong(9, admin.getId());
 
@@ -146,7 +142,7 @@ public class AdminDAOImpl implements AdminDAO {
 
             try (PreparedStatement psAdmin = conn.prepareStatement(updateAdmin)) {
                 if (admin.getFechaInicioAdmin() != null) {
-                    psAdmin.setDate(1, new java.sql.Date(admin.getFechaInicioAdmin().getTime()));
+                    psAdmin.setDate(1, DateUtils.toSqlDate(admin.getFechaInicioAdmin()));
                 } else {
                     psAdmin.setNull(1, java.sql.Types.DATE);
                 }
@@ -206,12 +202,12 @@ public class AdminDAOImpl implements AdminDAO {
 
         Date fechaCrea = rs.getDate("fecha_creacion_cuenta");
         if (!rs.wasNull()) {
-            admin.setFechaCreacionCuenta(new java.util.Date(fechaCrea.getTime()));
+            admin.setFechaInicioAdmin(DateUtils.toDate(fechaCrea.getTime()));
         }
 
         Date fechaInicio = rs.getDate("fecha_inicio_admin");
         if (!rs.wasNull()) {
-            admin.setFechaInicioAdmin(new java.util.Date(fechaInicio.getTime()));
+            admin.setFechaInicioAdmin(DateUtils.toDate(fechaInicio.getTime()));
         }
 
         return admin;

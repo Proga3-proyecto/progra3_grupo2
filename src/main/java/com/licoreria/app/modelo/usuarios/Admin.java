@@ -14,6 +14,10 @@ public class Admin extends Usuario {
         this.fechaInicioAdmin = fechaInicioAdmin;
     }
 
+    public Admin(){
+        
+    }
+
     public Admin(
             String dni,
             String nombre,

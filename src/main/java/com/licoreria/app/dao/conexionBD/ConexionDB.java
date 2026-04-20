@@ -7,36 +7,19 @@ import java.util.ResourceBundle;
 
 public class ConexionDB {
     private static ConexionDB instance;
-    private final Connection conexion;
-    private final boolean conectado;
-    private final String usuario;
-    private final String password;
+    private static final ResourceBundle db = ResourceBundle.getBundle("db");
 
-    private ConexionDB() throws SQLException {
-        ResourceBundle db = ResourceBundle.getBundle("db");
-        String dbURL = getDatabaseURL(db);
-        this.usuario = db.getString("db.usuario");
-        this.password = db.getString("db.password");
-        this.conexion = DriverManager.getConnection(dbURL, usuario, password);
-        this.conectado = conexion != null && !conexion.isClosed();
+    public static Connection getConexion() throws SQLException {
+        String url = getDatabaseURL();
+
+        return DriverManager.getConnection(
+                url,
+                db.getString("db.usuario"),
+                db.getString("db.password")
+        );
     }
 
-    public static synchronized ConexionDB getInstance() throws SQLException {
-        if (instance == null) {
-            instance = new ConexionDB();
-        }
-        return instance;
-    }
-
-    public Connection getConexion() {
-        return conexion;
-    }
-
-    public boolean isConectado() {
-        return conectado;
-    }
-
-    private String getDatabaseURL(ResourceBundle db) {
+    private static  String getDatabaseURL() {
         String host = db.getString("db.host");
         int port = Integer.parseInt(db.getString("db.puerto"));
         String esquema = db.getString("db.esquema");

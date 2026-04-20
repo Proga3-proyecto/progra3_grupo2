@@ -3,6 +3,7 @@ package com.licoreria.app.dao.clienteDAO;
 import com.licoreria.app.dao.conexionBD.ConexionDB;
 import com.licoreria.app.modelo.pedidos.Pedido;
 import com.licoreria.app.modelo.usuarios.Cliente;
+import com.licoreria.app.modelo.usuarios.EstadoCuenta;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -67,7 +68,7 @@ public class ClienteDAOImpl implements ClienteDAO {
                 psUsuario.setString(6, cliente.getCorreo());
                 psUsuario.setString(7, cliente.getContraseniaHash());
                 psUsuario.setString(8, cliente.getTelefono());
-                psUsuario.setString(9, cliente.getEstado() != null ? cliente.getEstadoString() : "ACTIVA");
+                psUsuario.setString(9, cliente.getEstado() != null ? cliente.getEstado().name(): "ACTIVA");
 
                 int affectedRows = psUsuario.executeUpdate();
                 if (affectedRows == 0) {
@@ -133,7 +134,7 @@ public class ClienteDAOImpl implements ClienteDAO {
                 psUsuario.setDate(4, new java.sql.Date(cliente.getFechaNacimiento().getTime()));
                 psUsuario.setString(5, cliente.getCorreo());
                 psUsuario.setString(6, cliente.getTelefono());
-                psUsuario.setString(7, cliente.getEstadoString());
+                psUsuario.setString(7, cliente.getEstado().name());
                 psUsuario.setLong(8, cliente.getId());
                 psUsuario.setString(9, cliente.getContraseniaHash());
                 psUsuario.executeUpdate();
@@ -195,7 +196,7 @@ public class ClienteDAOImpl implements ClienteDAO {
         c.setCorreo(rs.getString("correo"));
         c.setContraseniaHash(rs.getString("contrasena_hash"));
         c.setTelefono(rs.getString("telefono"));
-        c.setEstado(rs.getString("estado"));
+        c.setEstado(EstadoCuenta.valueOf(rs.getString("estado")));
 
         long idPedidoActivo = rs.getLong("id_pedido_activo");
         if (!rs.wasNull()) {
