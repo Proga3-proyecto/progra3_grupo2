@@ -6,6 +6,11 @@ public class DetalleProducto extends DetallePedido{
     private Producto producto;
     private int cantidad;
 
+    public  DetalleProducto(Producto producto, int cantidad){
+        this.producto = producto;
+        this.cantidad = cantidad;
+    }
+
     public int getCantidad() {
         return cantidad;
     }

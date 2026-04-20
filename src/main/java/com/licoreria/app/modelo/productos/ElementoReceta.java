@@ -20,4 +20,8 @@ public class ElementoReceta {
         this.producto = producto;
     }
 
+    public  ElementoReceta(Producto producto, double cantidad){
+        this.producto = producto;
+        this.cantidad = cantidad;
+    }
 }

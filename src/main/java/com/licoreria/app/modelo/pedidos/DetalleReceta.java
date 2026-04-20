@@ -8,6 +8,10 @@ public class DetalleReceta extends DetallePedido {
     private Receta recetaBase;
     private List<DetalleElementoReceta> elementosDesglosados;
 
+    public  DetalleReceta(Receta receta){
+        this.recetaBase = receta;
+    }
+
     public List<DetalleElementoReceta> getElementosDesglosados() {
         return elementosDesglosados;
     }

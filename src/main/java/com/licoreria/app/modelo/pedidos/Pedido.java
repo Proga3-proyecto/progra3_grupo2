@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 public class Pedido {
-    private int idPedido;
+    private long idPedido;
     private Cliente cliente;
     private Motorizado motorizado;
     private Date fechaPedido;
@@ -19,12 +19,30 @@ public class Pedido {
     private double precioDelivery;
     private EstadoPedido estado;
     private String direccionDestino;
-    
-    public int getIdPedido() {
+
+    public  Pedido(){
+
+    }
+    public Pedido(
+            Cliente cliente,
+            Motorizado motorizado,
+            Date fechaPedido,
+            List<DetallePedido> detalles,
+            LocalTime horaInicio,
+            String direccionDestino) {
+        this.cliente = cliente;
+        this.motorizado = motorizado;
+        this.fechaPedido = fechaPedido;
+        this.detalles = detalles;
+        this.horaInicio = horaInicio;
+        this.direccionDestino = direccionDestino;
+    }
+
+    public long getIdPedido() {
         return idPedido;
     }
 
-    public void setIdPedido(int idPedido) {
+    public void setIdPedido(long idPedido) {
         this.idPedido = idPedido;
     }
 

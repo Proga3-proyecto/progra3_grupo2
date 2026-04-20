@@ -1,25 +1,28 @@
 package com.licoreria.app.modelo.productos;
 
-import com.licoreria.app.modelo.pedidos.Pedido;
-
-import java.util.List;
-
 public class Producto {
-    private int idProducto;
-    private String  nombre;
+    private long id;
+    private String nombre;
     private double precio;
     private int stock;
     private double descuento;
     private String imagenURL;
-    private boolean paraCombos;
 
-
-    public int getIdProducto() {
-        return idProducto;
+    public Producto(String nombre, String imagenURL, double precio, int stock, double descuento) {
+        this.nombre = nombre;
+        this.imagenURL = imagenURL;
+        this.precio = precio;
+        this.stock = stock;
+        this.descuento = descuento;
     }
 
-    public void setIdProducto(int idProducto) {
-        this.idProducto = idProducto;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getNombre() {
@@ -62,11 +65,4 @@ public class Producto {
         this.imagenURL = imagenURL;
     }
 
-    public boolean isParaCombos() {
-        return paraCombos;
-    }
-
-    public void setParaCombos(boolean paraCombos) {
-        this.paraCombos = paraCombos;
-    }
 }

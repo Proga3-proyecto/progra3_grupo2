@@ -4,7 +4,11 @@ import com.licoreria.app.modelo.productos.ElementoReceta;
 
 public class DetalleElementoReceta {
     private ElementoReceta elementoBase;
-    private double cantidadEspecifica;
+    private int cantidadEspecifica;
+
+    public  DetalleElementoReceta(ElementoReceta elemento){
+        this.elementoBase = elemento;
+    }
     
     public ElementoReceta getElementoBase() {
         return elementoBase;
@@ -14,11 +18,11 @@ public class DetalleElementoReceta {
         this.elementoBase = elementoBase;
     }
 
-    public double getCantidadEspecifica() {
+    public int getCantidadEspecifica() {
         return cantidadEspecifica;
     }
 
-    public void setCantidadEspecifica(double cantidadEspecifica) {
+    public void setCantidadEspecifica(int cantidadEspecifica) {
         this.cantidadEspecifica = cantidadEspecifica;
     }
 

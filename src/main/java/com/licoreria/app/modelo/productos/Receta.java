@@ -3,18 +3,25 @@ package com.licoreria.app.modelo.productos;
 import java.util.List;
 
 public class Receta {
-    private int idReceta;
+    private long id;
     private String nombre;
     private List<ElementoReceta> productos;
     private String descripcion;
     private String imageSRC;
-    
-    public int getIdReceta() {
-        return idReceta;
+
+    public Receta(String nombre, String descripcion, String imageSRC, List<ElementoReceta> productos) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.imageSRC = imageSRC;
+        this.productos = productos;
     }
 
-    public void setIdReceta(int idReceta) {
-        this.idReceta = idReceta;
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getNombre() {

@@ -6,17 +6,39 @@ import java.util.Date;
 import java.util.List;
 
 public abstract class Usuario {
+    private long id;
     private List<Pedido> historialPedidos;
-    private int idUsuario;
     private String dni;
     private String nombre;
     private String apellidoCompleto;
     private Date fechaNacimiento;
     private Date fechaCreacionCuenta;
     private String correo;
-    private String contraseñaHash;
+    private String contraseniaHash;
     private String telefono;
     private EstadoCuenta estado;
+
+    public Usuario() {
+    }
+
+
+    public Usuario(
+            String dni,
+            String nombre,
+            String correo,
+            String telefono,
+            String apellidoCompleto,
+            Date fechaNacimiento,
+            String contraseniaHash) {
+
+        this.dni = dni;
+        this.nombre = nombre;
+        this.correo = correo;
+        this.telefono = telefono;
+        this.apellidoCompleto = apellidoCompleto;
+        this.fechaNacimiento = fechaNacimiento;
+        this.contraseniaHash = contraseniaHash;
+    }
 
     public List<Pedido> getHistorialPedidos() {
         return historialPedidos;
@@ -26,12 +48,12 @@ public abstract class Usuario {
         this.historialPedidos = historialPedidos;
     }
 
-    public int getIdUsuario() {
-        return idUsuario;
+    public long getId() {
+        return this.id;
     }
 
-    public void setIdUsuario(int idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getDni() {
@@ -82,12 +104,12 @@ public abstract class Usuario {
         this.correo = correo;
     }
 
-    public String getContraseñaHash() {
-        return contraseñaHash;
+    public String getContraseniaHash() {
+        return contraseniaHash;
     }
 
-    public void setContraseñaHash(String contraseñaHash) {
-        this.contraseñaHash = contraseñaHash;
+    public void setContraseniaHash(String contraseniaHash) {
+        this.contraseniaHash = contraseniaHash;
     }
 
     public String getTelefono() {
@@ -102,8 +124,34 @@ public abstract class Usuario {
         return estado;
     }
 
+    public  String getEstadoString(){
+        switch (this.estado) {
+            case EstadoCuenta.ACTIVA:
+                return "ACTIVA";
+            case EstadoCuenta.INACTIVA:
+                return "INACTIVA";
+            case EstadoCuenta.SUSPENDIDA:
+                return "SUSPENDIDA";
+        }
+        return null;
+    }
+
     public void setEstado(EstadoCuenta estado) {
         this.estado = estado;
+    }
+
+    public void setEstado(String s) {
+        switch (s) {
+            case "ACTIVA":
+                this.estado = EstadoCuenta.ACTIVA;
+                break;
+            case "INACTIVA":
+                this.estado = EstadoCuenta.INACTIVA;
+                break;
+            case "SUSPENDIDA":
+                this.estado = EstadoCuenta.SUSPENDIDA;
+                break;
+        }
     }
 
 
