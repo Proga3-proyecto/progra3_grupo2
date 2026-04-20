@@ -15,7 +15,7 @@ public class MotorizadoDAOImpl implements MotorizadoDAO {
         Motorizado motorizado = null;
         String query = "SELECT u.*, m.placa, m.horas_trabajo, m.pago_mensual FROM Usuario u INNER JOIN Motorizado m ON u.id_usuario = m.id_usuario WHERE u.id_usuario = ?";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setLong(1, id);
@@ -36,7 +36,7 @@ public class MotorizadoDAOImpl implements MotorizadoDAO {
         List<Motorizado> motorizados = new ArrayList<>();
         String query = "SELECT u.*, m.placa, m.horas_trabajo, m.pago_mensual FROM Usuario u INNER JOIN Motorizado m ON u.id_usuario = m.id_usuario";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
 
@@ -56,7 +56,7 @@ public class MotorizadoDAOImpl implements MotorizadoDAO {
 
         Connection conn = null;
         try {
-            conn = ConexionDB.getInstance().getConexion();
+            conn = ConexionDB.getConexion();
             conn.setAutoCommit(false);
 
             try (PreparedStatement psUsuario = conn.prepareStatement(insertUsuario, Statement.RETURN_GENERATED_KEYS)) {
@@ -128,7 +128,7 @@ public class MotorizadoDAOImpl implements MotorizadoDAO {
 
         Connection conn = null;
         try {
-            conn = ConexionDB.getInstance().getConexion();
+            conn = ConexionDB.getConexion();
             conn.setAutoCommit(false);
 
             try (PreparedStatement psUsuario = conn.prepareStatement(updateUsuario)) {
@@ -180,7 +180,7 @@ public class MotorizadoDAOImpl implements MotorizadoDAO {
     @Override
     public void delete(Motorizado motorizado) {
         String deleteUsuario = "DELETE FROM Usuario WHERE id_usuario = ?";
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(deleteUsuario)) {
 
             ps.setLong(1, motorizado.getId());

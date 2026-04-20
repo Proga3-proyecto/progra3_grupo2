@@ -16,7 +16,7 @@ public class RecetaDAOImpl implements RecetaDAO {
         Receta receta = null;
         String queryReceta = "SELECT * FROM Receta WHERE id_receta = ?";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(queryReceta)) {
 
             ps.setLong(1, id);
@@ -44,7 +44,7 @@ public class RecetaDAOImpl implements RecetaDAO {
         List<Receta> recetas = new ArrayList<>();
         String query = "SELECT * FROM Receta";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
 
@@ -74,7 +74,7 @@ public class RecetaDAOImpl implements RecetaDAO {
 
         Connection conn = null;
         try {
-            conn = ConexionDB.getInstance().getConexion();
+            conn = ConexionDB.getConexion();
             conn.setAutoCommit(false);
 
             try (PreparedStatement psReceta = conn.prepareStatement(insertReceta, Statement.RETURN_GENERATED_KEYS)) {
@@ -139,7 +139,7 @@ public class RecetaDAOImpl implements RecetaDAO {
 
         Connection conn = null;
         try {
-            conn = ConexionDB.getInstance().getConexion();
+            conn = ConexionDB.getConexion();
             conn.setAutoCommit(false);
 
             try (PreparedStatement psReceta = conn.prepareStatement(updateReceta)) {
@@ -192,7 +192,7 @@ public class RecetaDAOImpl implements RecetaDAO {
     @Override
     public void delete(Receta receta) {
         String query = "DELETE FROM Receta WHERE id_receta = ?";
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setLong(1, receta.getId());

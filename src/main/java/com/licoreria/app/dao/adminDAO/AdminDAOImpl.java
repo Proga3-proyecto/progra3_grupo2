@@ -16,7 +16,7 @@ public class AdminDAOImpl implements AdminDAO {
         Admin admin = null;
         String query = "SELECT u.*, a.fecha_inicio_admin FROM Usuario u INNER JOIN Admin a ON u.id_usuario = a.id_usuario WHERE u.id_usuario = ?";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setLong(1, id);
@@ -37,7 +37,7 @@ public class AdminDAOImpl implements AdminDAO {
         List<Admin> administradores = new ArrayList<>();
         String query = "SELECT u.*, a.fecha_inicio_admin FROM Usuario u INNER JOIN Admin a ON u.id_usuario = a.id_usuario";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
 
@@ -57,7 +57,7 @@ public class AdminDAOImpl implements AdminDAO {
 
         Connection conn = null;
         try {
-            conn = ConexionDB.getInstance().getConexion();
+            conn = ConexionDB.getConexion();
             conn.setAutoCommit(false);
 
             try (PreparedStatement psUsuario = conn.prepareStatement(insertUsuario, Statement.RETURN_GENERATED_KEYS)) {
@@ -123,7 +123,7 @@ public class AdminDAOImpl implements AdminDAO {
 
         Connection conn = null;
         try {
-            conn = ConexionDB.getInstance().getConexion();
+            conn = ConexionDB.getConexion();
             conn.setAutoCommit(false);
 
             try (PreparedStatement psUsuario = conn.prepareStatement(updateUsuario)) {
@@ -175,7 +175,7 @@ public class AdminDAOImpl implements AdminDAO {
     @Override
     public void delete(Admin admin) {
         String deleteUsuario = "DELETE FROM Usuario WHERE id_usuario = ?";
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(deleteUsuario)) {
 
             ps.setLong(1, admin.getId());

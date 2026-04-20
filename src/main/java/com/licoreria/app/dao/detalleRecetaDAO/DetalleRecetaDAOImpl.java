@@ -28,7 +28,7 @@ public class DetalleRecetaDAOImpl implements DetalleRecetaDAO {
 
         Connection conn = null;
         try {
-            conn = ConexionDB.getInstance().getConexion();
+            conn = ConexionDB.getConexion();
             conn.setAutoCommit(false);
 
             try (PreparedStatement psDetalle = conn.prepareStatement(insertDetalle, Statement.RETURN_GENERATED_KEYS)) {
@@ -75,7 +75,7 @@ public class DetalleRecetaDAOImpl implements DetalleRecetaDAO {
 
         Connection conn = null;
         try {
-            conn = ConexionDB.getInstance().getConexion();
+            conn = ConexionDB.getConexion();
             conn.setAutoCommit(false);
 
             try (PreparedStatement psDetalle = conn.prepareStatement(updateDetalle)) {
@@ -115,7 +115,7 @@ public class DetalleRecetaDAOImpl implements DetalleRecetaDAO {
     @Override
     public void delete(long idDetalleReceta) {
         String query = "DELETE FROM Detalle_Receta WHERE id_detalle_receta = ?";
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setLong(1, idDetalleReceta);
             ps.executeUpdate();
@@ -127,7 +127,7 @@ public class DetalleRecetaDAOImpl implements DetalleRecetaDAO {
 
     private List<DetalleReceta> obtenerDetalles(String query, long idFiltro) {
         List<DetalleReceta> lista = new ArrayList<>();
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setLong(1, idFiltro);

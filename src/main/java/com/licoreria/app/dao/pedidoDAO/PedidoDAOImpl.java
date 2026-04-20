@@ -17,7 +17,7 @@ public class PedidoDAOImpl implements PedidoDAO {
         Pedido pedido = null;
         String query = "SELECT * FROM Pedido WHERE id_pedido = ?";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setLong(1, id);
@@ -38,7 +38,7 @@ public class PedidoDAOImpl implements PedidoDAO {
         List<Pedido> pedidos = new ArrayList<>();
         String query = "SELECT * FROM Pedido";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
 
@@ -56,7 +56,7 @@ public class PedidoDAOImpl implements PedidoDAO {
         String query = "INSERT INTO Pedido (id_cliente, id_motorizado, fecha_pedido, hora_inicio, hora_fin, precio_total, precio_delivery, estado, direccion_destino) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         long idGenerado = -1;
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setLong(1, pedido.getCliente().getId());
@@ -102,7 +102,7 @@ public class PedidoDAOImpl implements PedidoDAO {
     public void update(Pedido pedido) {
         String query = "UPDATE Pedido SET id_cliente=?, id_motorizado=?, fecha_pedido=?, hora_inicio=?, hora_fin=?, precio_total=?, precio_delivery=?, estado=?, direccion_destino=? WHERE id_pedido=?";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setLong(1, pedido.getCliente().getId());
@@ -131,7 +131,7 @@ public class PedidoDAOImpl implements PedidoDAO {
     @Override
     public void delete(long idPedido) {
         String query = "DELETE FROM Pedido WHERE id_pedido = ?";
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setLong(1, idPedido);
             ps.executeUpdate();

@@ -24,7 +24,7 @@ public class DetalleProductoDAOImpl implements DetalleProductoDAO {
     public void save(DetalleProducto detalle, Long idPedido, Long idClienteCarrito) {
         String query = "INSERT INTO Detalle_Producto (id_pedido, id_cliente_carrito, id_producto, cantidad, descuento_total, monto_total) VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             setNullableParams(ps, idPedido, idClienteCarrito);
@@ -49,7 +49,7 @@ public class DetalleProductoDAOImpl implements DetalleProductoDAO {
     public void update(DetalleProducto detalle, Long idPedido, Long idClienteCarrito) {
         String query = "UPDATE Detalle_Producto SET id_pedido=?, id_cliente_carrito=?, id_producto=?, cantidad=?, descuento_total=?, monto_total=? WHERE id_detalle_producto=?";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query)) {
 
             setNullableParams(ps, idPedido, idClienteCarrito);
@@ -68,7 +68,7 @@ public class DetalleProductoDAOImpl implements DetalleProductoDAO {
     @Override
     public void delete(long idDetalleProducto) {
         String query = "DELETE FROM Detalle_Producto WHERE id_detalle_producto = ?";
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setLong(1, idDetalleProducto);
             ps.executeUpdate();
@@ -80,7 +80,7 @@ public class DetalleProductoDAOImpl implements DetalleProductoDAO {
 
     private List<DetalleProducto> obtenerDetalles(String query, long idFiltro) {
         List<DetalleProducto> lista = new ArrayList<>();
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setLong(1, idFiltro);
             try (ResultSet rs = ps.executeQuery()) {

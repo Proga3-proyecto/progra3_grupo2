@@ -4,6 +4,7 @@ import com.licoreria.app.dao.conexionBD.ConexionDB;
 import com.licoreria.app.modelo.pedidos.Pedido;
 import com.licoreria.app.modelo.usuarios.Cliente;
 import com.licoreria.app.modelo.usuarios.EstadoCuenta;
+import com.licoreria.app.utils.DateUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ public class ClienteDAOImpl implements ClienteDAO {
         Cliente cliente = null;
         String query = "SELECT u.*, c.id_pedido_activo FROM Usuario u INNER JOIN Cliente c ON u.id_usuario = c.id_usuario WHERE u.id_usuario = ?";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setLong(1, id);
@@ -36,7 +37,7 @@ public class ClienteDAOImpl implements ClienteDAO {
         List<Cliente> clientes = new ArrayList<>();
         String query = "SELECT u.*, c.id_pedido_activo FROM Usuario u INNER JOIN Cliente c ON u.id_usuario = c.id_usuario";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
 
@@ -56,15 +57,15 @@ public class ClienteDAOImpl implements ClienteDAO {
 
         Connection conn = null;
         try {
-            conn = ConexionDB.getInstance().getConexion();
+            conn = ConexionDB.getConexion();
             conn.setAutoCommit(false);
 
             try (PreparedStatement psUsuario = conn.prepareStatement(insertUsuario, Statement.RETURN_GENERATED_KEYS)) {
                 psUsuario.setString(1, cliente.getDni());
                 psUsuario.setString(2, cliente.getNombre());
                 psUsuario.setString(3, cliente.getApellidoCompleto());
-                psUsuario.setDate(4, new java.sql.Date(cliente.getFechaNacimiento().getTime()));
-                psUsuario.setDate(5, new java.sql.Date(cliente.getFechaCreacionCuenta().getTime()));
+                psUsuario.setDate(4, DateUtils.toSqlDate(cliente.getFechaNacimiento()));
+                psUsuario.setDate(5, DateUtils.toSqlDate(cliente.getFechaCreacionCuenta()));
                 psUsuario.setString(6, cliente.getCorreo());
                 psUsuario.setString(7, cliente.getContraseniaHash());
                 psUsuario.setString(8, cliente.getTelefono());
@@ -124,14 +125,14 @@ public class ClienteDAOImpl implements ClienteDAO {
 
         Connection conn = null;
         try {
-            conn = ConexionDB.getInstance().getConexion();
+            conn = ConexionDB.getConexion();
             conn.setAutoCommit(false);
 
             try (PreparedStatement psUsuario = conn.prepareStatement(updateUsuario)) {
                 psUsuario.setString(1, cliente.getDni());
                 psUsuario.setString(2, cliente.getNombre());
                 psUsuario.setString(3, cliente.getApellidoCompleto());
-                psUsuario.setDate(4, new java.sql.Date(cliente.getFechaNacimiento().getTime()));
+                psUsuario.setDate(4, DateUtils.toSqlDate(cliente.getFechaNacimiento()));
                 psUsuario.setString(5, cliente.getCorreo());
                 psUsuario.setString(6, cliente.getTelefono());
                 psUsuario.setString(7, cliente.getEstado().name());
@@ -176,7 +177,7 @@ public class ClienteDAOImpl implements ClienteDAO {
     @Override
     public void delete(Cliente cliente) {
         String deleteUsuario = "DELETE FROM Usuario WHERE id_usuario = ?";
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(deleteUsuario)) {
             ps.setLong(1, cliente.getId());
             ps.executeUpdate();

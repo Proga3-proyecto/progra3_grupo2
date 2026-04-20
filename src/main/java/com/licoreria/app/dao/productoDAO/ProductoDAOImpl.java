@@ -14,7 +14,7 @@ public class ProductoDAOImpl implements ProductoDAO {
         Producto producto = null;
         String query = "SELECT * FROM Producto WHERE id_producto = ?";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setLong(1, id);
@@ -35,7 +35,7 @@ public class ProductoDAOImpl implements ProductoDAO {
         List<Producto> productos = new ArrayList<>();
         String query = "SELECT * FROM Producto";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
 
@@ -53,7 +53,7 @@ public class ProductoDAOImpl implements ProductoDAO {
 
         String insertQuery = "INSERT INTO Producto (nombre, precio, stock, descuento, imagen_url) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, producto.getNombre());
@@ -83,7 +83,7 @@ public class ProductoDAOImpl implements ProductoDAO {
     public void update(Producto producto) {
         String updateQuery = "UPDATE Producto SET nombre=?, precio=?, stock=?, descuento=?, imagen_url=? WHERE id_producto=?";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(updateQuery)) {
 
             ps.setString(1, producto.getNombre());
@@ -104,7 +104,7 @@ public class ProductoDAOImpl implements ProductoDAO {
     public void delete(Producto producto) {
         String deleteQuery = "DELETE FROM Producto WHERE id_producto = ?";
 
-        try (Connection conn = ConexionDB.getInstance().getConexion();
+        try (Connection conn = ConexionDB.getConexion();
              PreparedStatement ps = conn.prepareStatement(deleteQuery)) {
 
             ps.setLong(1, producto.getId());

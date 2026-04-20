@@ -20,7 +20,7 @@ public class Main {
 //                "####"
 //        );
 //
-        AdminDAO adminDao = new AdminDAOImpl();
+       // AdminDAO adminDao = new AdminDAOImpl();
 
 //        List<Admin> admins = adminDao.getAll();
 
@@ -33,9 +33,10 @@ public class Main {
 
 //        adminDao.save(admin);
 
-        Admin admin = adminDao.get(1);
-        admin.setApellidoCompleto("hola como estas");
-        adminDao.update(admin);
+        //Admin admin = adminDao.get(1);
+//        admin.setApellidoCompleto("hola como estas");
+//        adminDao.update(admin);
+        //adminDao.delete(admin);
 
     }
 }
