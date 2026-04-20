@@ -5,15 +5,17 @@ import java.util.List;
 public class Receta {
     private long id;
     private String nombre;
-    private List<ElementoReceta> productos;
+    private List<ElementoReceta> elementos;
     private String descripcion;
     private String imageSRC;
 
-    public Receta(String nombre, String descripcion, String imageSRC, List<ElementoReceta> productos) {
+    public Receta(){}
+
+    public Receta(String nombre, String descripcion, String imageSRC, List<ElementoReceta> elementos) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.imageSRC = imageSRC;
-        this.productos = productos;
+        this.elementos = elementos;
     }
 
     public long getId() {
@@ -32,12 +34,12 @@ public class Receta {
         this.nombre = nombre;
     }
 
-    public List<ElementoReceta> getProductos() {
-        return productos;
+    public List<ElementoReceta> getElementos() {
+        return elementos;
     }
 
-    public void setProductos(List<ElementoReceta> productos) {
-        this.productos = productos;
+    public void setElementos(List<ElementoReceta> elementos) {
+        this.elementos = elementos;
     }
 
     public String getDescripcion() {

@@ -92,9 +92,9 @@ public class RecetaDAOImpl implements RecetaDAO {
                         long idReceta = generatedKeys.getLong(1);
                         receta.setId(idReceta);
 
-                        if (receta.getProductos() != null && !receta.getProductos().isEmpty()) {
+                        if (receta.getElementos() != null && !receta.getElementos().isEmpty()) {
                             try (PreparedStatement psElemento = conn.prepareStatement(insertElemento)) {
-                                for (ElementoReceta elemento : receta.getProductos()) {
+                                for (ElementoReceta elemento : receta.getElementos()) {
                                     psElemento.setLong(1, idReceta);
                                     // Asume que la clase Producto tiene un método getId()
                                     psElemento.setLong(2, elemento.getProducto().getId());
@@ -155,9 +155,9 @@ public class RecetaDAOImpl implements RecetaDAO {
                 psDelete.executeUpdate();
             }
 
-            if (receta.getProductos() != null && !receta.getProductos().isEmpty()) {
+            if (receta.getElementos() != null && !receta.getElementos().isEmpty()) {
                 try (PreparedStatement psInsert = conn.prepareStatement(insertElemento)) {
-                    for (ElementoReceta elemento : receta.getProductos()) {
+                    for (ElementoReceta elemento : receta.getElementos()) {
                         psInsert.setLong(1, receta.getId());
                         psInsert.setLong(2, elemento.getProducto().getId());
                         psInsert.setDouble(3, elemento.getCantidad());
