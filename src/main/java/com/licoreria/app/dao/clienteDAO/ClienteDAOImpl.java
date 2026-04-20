@@ -56,7 +56,7 @@ public class ClienteDAOImpl implements ClienteDAO {
         Connection conn = null;
         try {
             conn = ConexionDB.getInstance().getConexion();
-            conn.setAutoCommit(false); // Iniciar transacción
+            conn.setAutoCommit(false);
 
             try (PreparedStatement psUsuario = conn.prepareStatement(insertUsuario, Statement.RETURN_GENERATED_KEYS)) {
                 psUsuario.setString(1, cliente.getDni());
@@ -94,11 +94,11 @@ public class ClienteDAOImpl implements ClienteDAO {
                     }
                 }
             }
-            conn.commit(); // Confirmar transacción
+            conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
                 try {
-                    conn.rollback(); // Revertir en caso de error
+                    conn.rollback();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }

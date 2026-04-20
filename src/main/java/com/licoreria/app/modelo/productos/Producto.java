@@ -8,6 +8,9 @@ public class Producto {
     private double descuento;
     private String imagenURL;
 
+    public  Producto(){
+
+    }
     public Producto(String nombre, String imagenURL, double precio, int stock, double descuento) {
         this.nombre = nombre;
         this.imagenURL = imagenURL;
