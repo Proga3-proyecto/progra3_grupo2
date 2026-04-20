@@ -65,7 +65,7 @@ public class ClienteDAOImpl implements ClienteDAO {
                 psUsuario.setString(2, cliente.getNombre());
                 psUsuario.setString(3, cliente.getApellidoCompleto());
                 psUsuario.setDate(4, DateUtils.toSqlDate(cliente.getFechaNacimiento()));
-                psUsuario.setDate(5, DateUtils.toSqlDate(cliente.getFechaCreacionCuenta()));
+                psUsuario.setDate(5, DateUtils.toSqlDate(cliente.getFechaCreacionCuenta(), System.currentTimeMillis()));
                 psUsuario.setString(6, cliente.getCorreo());
                 psUsuario.setString(7, cliente.getContraseniaHash());
                 psUsuario.setString(8, cliente.getTelefono());
@@ -136,8 +136,8 @@ public class ClienteDAOImpl implements ClienteDAO {
                 psUsuario.setString(5, cliente.getCorreo());
                 psUsuario.setString(6, cliente.getTelefono());
                 psUsuario.setString(7, cliente.getEstado().name());
-                psUsuario.setLong(8, cliente.getId());
-                psUsuario.setString(9, cliente.getContraseniaHash());
+                psUsuario.setString(8, cliente.getContraseniaHash());
+                psUsuario.setLong(9, cliente.getId());
                 psUsuario.executeUpdate();
             }
 

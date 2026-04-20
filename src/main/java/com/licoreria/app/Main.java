@@ -2,7 +2,10 @@ package com.licoreria.app;
 
 import com.licoreria.app.dao.adminDAO.AdminDAO;
 import com.licoreria.app.dao.adminDAO.AdminDAOImpl;
+import com.licoreria.app.dao.clienteDAO.ClienteDAO;
+import com.licoreria.app.dao.clienteDAO.ClienteDAOImpl;
 import com.licoreria.app.modelo.usuarios.Admin;
+import com.licoreria.app.modelo.usuarios.Cliente;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -37,6 +40,10 @@ public class Main {
 //        admin.setApellidoCompleto("hola como estas");
 //        adminDao.update(admin);
         //adminDao.delete(admin);
-
+       Cliente cliente = new Cliente("3231231", "sax 123","sdsada","32321","dsdsa",new Date(10,10,2026), "dsdsa");
+        ClienteDAO clienteDao = new ClienteDAOImpl();
+//        clienteDao.delete(cliente);
+        cliente.setId(4);
+        clienteDao.delete(cliente);
     }
 }
