@@ -96,12 +96,11 @@ public class RecetaDAOImpl implements RecetaDAO {
                             try (PreparedStatement psElemento = conn.prepareStatement(insertElemento)) {
                                 for (ElementoReceta elemento : receta.getElementos()) {
                                     psElemento.setLong(1, idReceta);
-                                    // Asume que la clase Producto tiene un método getId()
                                     psElemento.setLong(2, elemento.getProducto().getId());
                                     psElemento.setDouble(3, elemento.getCantidad());
                                     psElemento.addBatch();
                                 }
-                                psElemento.executeBatch(); // Ejecutar inserciones en lote
+                                psElemento.executeBatch(); 
                             }
                         }
                     } else {
