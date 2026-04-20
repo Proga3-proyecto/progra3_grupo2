@@ -3,6 +3,7 @@ package com.licoreria.app.modelo.pedidos;
 import com.licoreria.app.modelo.productos.ElementoReceta;
 
 public class DetalleElementoReceta {
+    private long id;
     private ElementoReceta elementoBase;
     private int cantidadEspecifica;
 
@@ -13,7 +14,13 @@ public class DetalleElementoReceta {
     public ElementoReceta getElementoBase() {
         return elementoBase;
     }
+    public long getId() {
+        return id;
+    }
 
+    public void setId(long id) {
+        this.id = id;
+    }
     public void setElementoBase(ElementoReceta elementoBase) {
         this.elementoBase = elementoBase;
     }

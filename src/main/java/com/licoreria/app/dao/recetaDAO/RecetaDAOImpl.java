@@ -207,7 +207,7 @@ public class RecetaDAOImpl implements RecetaDAO {
     private List<ElementoReceta> getElementosPorReceta(Connection conn, long idReceta) throws SQLException {
         List<ElementoReceta> elementos = new ArrayList<>();
 
-        String query = "SELECT er.cantidad, p.id_producto, p.nombre, p.precio,p.imagen_url" +
+        String query = "SELECT er.cantidad, p.id_producto, p.nombre, p.precio,p.imagen_url " +
                 "FROM Elemento_Receta er " +
                 "INNER JOIN Producto p ON er.id_producto = p.id_producto " +
                 "WHERE er.id_receta = ?";

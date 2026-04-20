@@ -2,6 +2,7 @@ package com.licoreria.app.dao.adminDAO;
 
 import com.licoreria.app.dao.conexionBD.ConexionDB;
 import com.licoreria.app.modelo.usuarios.Admin;
+import com.licoreria.app.utils.DateUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -62,8 +63,8 @@ public class AdminDAOImpl implements AdminDAO {
                 psUsuario.setString(1, admin.getDni());
                 psUsuario.setString(2, admin.getNombre());
                 psUsuario.setString(3, admin.getApellidoCompleto());
-                psUsuario.setDate(4, admin.getFechaNacimiento() != null ? new java.sql.Date(admin.getFechaNacimiento().getTime()) : null);
-                psUsuario.setDate(5, admin.getFechaCreacionCuenta() != null ? new java.sql.Date(admin.getFechaCreacionCuenta().getTime()) : new java.sql.Date(System.currentTimeMillis()));
+                psUsuario.setDate(4, DateUtils.toSqlDate(admin.getFechaNacimiento()));
+                psUsuario.setDate(5, DateUtils.toSqlDate(admin.getFechaCreacionCuenta(), System.currentTimeMillis()));
                 psUsuario.setString(6, admin.getCorreo());
                 psUsuario.setString(7, admin.getContraseniaHash());
                 psUsuario.setString(8, admin.getTelefono());
