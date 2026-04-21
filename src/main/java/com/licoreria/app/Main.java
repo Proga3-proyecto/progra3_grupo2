@@ -1,5 +1,7 @@
 package com.licoreria.app;
 
+import com.licoreria.app.dao.adminDAO.AdminDAO;
+import com.licoreria.app.dao.adminDAO.AdminDAOImpl;
 import com.licoreria.app.dao.clienteDAO.ClienteDAO;
 import com.licoreria.app.dao.clienteDAO.ClienteDAOImpl;
 import com.licoreria.app.dao.detalleProductoDAO.DetalleProductoDAO;
@@ -12,6 +14,7 @@ import com.licoreria.app.modelo.pedidos.DetalleProducto;
 import com.licoreria.app.modelo.productos.ElementoReceta;
 import com.licoreria.app.modelo.productos.Producto;
 import com.licoreria.app.modelo.productos.Receta;
+import com.licoreria.app.modelo.usuarios.Admin;
 import com.licoreria.app.modelo.usuarios.Cliente;
 
 import java.util.ArrayList;
@@ -26,12 +29,12 @@ public class Main {
 //                "adada@gmail.com",
 //                "99999999",
 //                "sax",
-//                new Date(10,20,2025),
+//                new Date(10,8,2025),
 //                "####"
 //        );
 //
-        // AdminDAO adminDao = new AdminDAOImpl();
-
+//         AdminDAO adminDao = new AdminDAOImpl();
+//         adminDao.get()
 //        List<Admin> admins = adminDao.getAll();
 
 //        for(Admin admin: admins){
