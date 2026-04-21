@@ -16,7 +16,6 @@ public class Cliente extends Usuario {
     private Pedido pedidoActivo;
     private List<String> direcciones;
 
-    private List<Producto> productosFavoritos;
     private List<Receta> recetasFavoritos;
 
     public Cliente(){
@@ -67,13 +66,7 @@ public class Cliente extends Usuario {
         this.direcciones = direcciones;
     }
 
-    public List<Producto> getProductosFavoritos() {
-        return productosFavoritos;
-    }
 
-    public void setProductosFavoritos(List<Producto> productosFavoritos) {
-        this.productosFavoritos = productosFavoritos;
-    }
 
     public List<Receta> getRecetasFavoritos() {
         return recetasFavoritos;
