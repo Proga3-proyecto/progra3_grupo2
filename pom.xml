@@ -10,7 +10,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>dao</module>
-        <module>business-logic</module>
         <module>DBManager</module>
         <module>dominio</module>
         <module>app</module>
