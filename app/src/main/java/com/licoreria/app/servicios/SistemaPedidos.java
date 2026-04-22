@@ -1,7 +1,7 @@
 package com.licoreria.app.servicios;
 
 
-import com.licoreria.app.dominio.pedidos.Pedido;
+import com.licoreria.dominio.pedidos.Pedido;
 
 import java.util.List;
 

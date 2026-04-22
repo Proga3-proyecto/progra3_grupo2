@@ -1,6 +1,6 @@
 package com.licoreria.app.servicios;
 
-import com.licoreria.app.dominio.usuarios.Usuario;
+import com.licoreria.dominio.usuarios.Usuario;
 
 import java.util.List;
 
