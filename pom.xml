@@ -13,6 +13,7 @@
         <module>DBManager</module>
         <module>dominio</module>
         <module>app</module>
+        <module>BusinessLayer</module>
     </modules>
 
     <properties>

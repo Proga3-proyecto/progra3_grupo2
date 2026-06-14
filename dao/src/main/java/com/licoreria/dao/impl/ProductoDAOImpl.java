@@ -3,9 +3,7 @@ package com.licoreria.dao.impl;
 import com.licoreria.DBmanager.DBManager;
 import com.licoreria.DBmanager.TransactionContext;
 import com.licoreria.dao.ProductoDAO;
-import com.licoreria.dominio.productos.Impuesto;
-import com.licoreria.dominio.productos.Producto;
-import com.licoreria.dominio.productos.TipoImpuesto;
+import com.licoreria.dominio.productos.*;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -16,7 +14,13 @@ public class ProductoDAOImpl implements ProductoDAO {
     @Override
     public Producto get(Long id) throws SQLException {
         Producto producto = null;
-        String query = "SELECT * FROM Producto WHERE id_producto = ?";
+        // Se agregan las columnas de categoría y marca en el SELECT
+        String query = "SELECT p.*, c.id_categoria AS cat_id, c.nombre AS cat_nombre, "
+                + "m.id_marca AS mar_id, m.nombre AS mar_nombre "
+                + "FROM Producto p "
+                + "LEFT JOIN Categoria c ON p.id_categoria = c.id_categoria "
+                + "LEFT JOIN Marca m ON p.id_marca = m.id_marca "
+                + "WHERE p.id_producto = ?";
 
         try (Connection conn = DBManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
@@ -34,12 +38,15 @@ public class ProductoDAOImpl implements ProductoDAO {
     @Override
     public List<Producto> getAll() throws SQLException {
         List<Producto> productos = new ArrayList<>();
-        String query = "SELECT * FROM Producto";
+        String query = "SELECT p.*, c.id_categoria AS cat_id, c.nombre AS cat_nombre, "
+                + "m.id_marca AS mar_id, m.nombre AS mar_nombre "
+                + "FROM Producto p "
+                + "LEFT JOIN Categoria c ON p.id_categoria = c.id_categoria "
+                + "LEFT JOIN Marca m ON p.id_marca = m.id_marca";
 
         try (Connection conn = DBManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
-
             while (rs.next()) {
                 Producto p = mapResultSetToProducto(rs);
                 p.setImpuestos(getImpuestosPorProducto(conn, p.getId()));
@@ -51,7 +58,9 @@ public class ProductoDAOImpl implements ProductoDAO {
 
     @Override
     public Producto save(Producto producto) throws SQLException {
-        String insertQuery = "INSERT INTO Producto (nombre, precio, stock, descuento, imagen_url, volumen_litros, porcentaje_alcohol) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        // Se agregan id_categoria e id_marca al INSERT
+        String insertQuery = "INSERT INTO Producto (nombre, id_categoria, id_marca, precio, stock, descuento, imagen_url, volumen_litros, porcentaje_alcohol) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String insertImpuestos = "INSERT INTO Producto_Impuesto (id_producto, id_impuesto) VALUES (?, ?)";
 
         Connection conn = TransactionContext.getConnection();
@@ -59,23 +68,34 @@ public class ProductoDAOImpl implements ProductoDAO {
         try {
             try (PreparedStatement ps = conn.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, producto.getNombre());
-                ps.setDouble(2, producto.getPrecio());
-                ps.setInt(3, producto.getStock());
-                ps.setDouble(4, producto.getDescuento());
-                ps.setString(5, producto.getImagenURL());
+                // Categoría
+                if (producto.getCategoria() != null && producto.getCategoria().getId() != null) {
+                    ps.setLong(2, producto.getCategoria().getId());
+                } else {
+                    ps.setNull(2, java.sql.Types.INTEGER);
+                }
+                // Marca
+                if (producto.getMarca() != null && producto.getMarca().getId() != null) {
+                    ps.setLong(3, producto.getMarca().getId());
+                } else {
+                    ps.setNull(3, java.sql.Types.INTEGER);
+                }
+                ps.setDouble(4, producto.getPrecio());
+                ps.setInt(5, producto.getStock());
+                ps.setDouble(6, producto.getDescuento());
+                ps.setString(7, producto.getImagenURL());
 
                 if (producto.getVolumenLitros() != null) {
-                    ps.setDouble(6, producto.getVolumenLitros());
+                    ps.setDouble(8, producto.getVolumenLitros());
                 } else {
-                    ps.setNull(6, java.sql.Types.DECIMAL);
+                    ps.setNull(8, java.sql.Types.DECIMAL);
                 }
 
                 if (producto.getPorcentajeAlcohol() != null) {
-                    ps.setDouble(7, producto.getPorcentajeAlcohol());
+                    ps.setDouble(9, producto.getPorcentajeAlcohol());
                 } else {
-                    ps.setNull(7, java.sql.Types.DECIMAL);
+                    ps.setNull(9, java.sql.Types.DECIMAL);
                 }
-
 
                 ps.executeUpdate();
 
@@ -109,7 +129,8 @@ public class ProductoDAOImpl implements ProductoDAO {
 
     @Override
     public Producto update(Producto producto) throws SQLException {
-        String updateQuery = "UPDATE Producto SET nombre=?, precio=?, stock=?, descuento=?, imagen_url=?, volumen_litros=?, porcentaje_alcohol=? WHERE id_producto=?";
+        // Se agregan id_categoria e id_marca al UPDATE
+        String updateQuery = "UPDATE Producto SET nombre=?, id_categoria=?, id_marca=?, precio=?, stock=?, descuento=?, imagen_url=?, volumen_litros=?, porcentaje_alcohol=? WHERE id_producto=?";
         String deleteImpuestos = "DELETE FROM Producto_Impuesto WHERE id_producto=?";
         String insertImpuestos = "INSERT INTO Producto_Impuesto (id_producto, id_impuesto) VALUES (?, ?)";
 
@@ -118,27 +139,40 @@ public class ProductoDAOImpl implements ProductoDAO {
         try {
             try (PreparedStatement ps = conn.prepareStatement(updateQuery)) {
                 ps.setString(1, producto.getNombre());
-                ps.setDouble(2, producto.getPrecio());
-                ps.setInt(3, producto.getStock());
-                ps.setDouble(4, producto.getDescuento());
-                ps.setString(5, producto.getImagenURL());
+                // Categoría
+                if (producto.getCategoria() != null && producto.getCategoria().getId() != null) {
+                    ps.setLong(2, producto.getCategoria().getId());
+                } else {
+                    ps.setNull(2, java.sql.Types.INTEGER);
+                }
+                // Marca
+                if (producto.getMarca() != null && producto.getMarca().getId() != null) {
+                    ps.setLong(3, producto.getMarca().getId());
+                } else {
+                    ps.setNull(3, java.sql.Types.INTEGER);
+                }
+                ps.setDouble(4, producto.getPrecio());
+                ps.setInt(5, producto.getStock());
+                ps.setDouble(6, producto.getDescuento());
+                ps.setString(7, producto.getImagenURL());
 
                 if (producto.getVolumenLitros() != null) {
-                    ps.setDouble(6, producto.getVolumenLitros());
+                    ps.setDouble(8, producto.getVolumenLitros());
                 } else {
-                    ps.setNull(6, java.sql.Types.DECIMAL);
+                    ps.setNull(8, java.sql.Types.DECIMAL);
                 }
 
                 if (producto.getPorcentajeAlcohol() != null) {
-                    ps.setDouble(7, producto.getPorcentajeAlcohol());
+                    ps.setDouble(9, producto.getPorcentajeAlcohol());
                 } else {
-                    ps.setNull(7, java.sql.Types.DECIMAL);
+                    ps.setNull(9, java.sql.Types.DECIMAL);
                 }
 
-                ps.setLong(8, producto.getId());
+                ps.setLong(10, producto.getId());
                 ps.executeUpdate();
             }
 
+            // Reemplazar impuestos
             try (PreparedStatement psDel = conn.prepareStatement(deleteImpuestos)) {
                 psDel.setLong(1, producto.getId());
                 psDel.executeUpdate();
@@ -154,6 +188,7 @@ public class ProductoDAOImpl implements ProductoDAO {
                     psImp.executeBatch();
                 }
             }
+
             TransactionContext.commit();
         } catch (SQLException e) {
             TransactionContext.rollback();
@@ -214,15 +249,29 @@ public class ProductoDAOImpl implements ProductoDAO {
         );
         p.setId(rs.getLong("id_producto"));
 
-        double volumen = rs.getDouble("volumen_litros");
+        // Mapear categoría
+        long catId = rs.getLong("cat_id");
         if (!rs.wasNull()) {
-            p.setVolumenLitros(volumen);
+            Categoria categoria = new Categoria();
+            categoria.setId(catId);
+            categoria.setNombre(rs.getString("cat_nombre"));
+            p.setCategoria(categoria);
         }
 
-        double porcentaje = rs.getDouble("porcentaje_alcohol");
+        // Mapear marca
+        long marId = rs.getLong("mar_id");
         if (!rs.wasNull()) {
-            p.setPorcentajeAlcohol(porcentaje);
+            Marca marca = new Marca();
+            marca.setId(marId);
+            marca.setNombre(rs.getString("mar_nombre"));
+            p.setMarca(marca);
         }
+
+        // Volumen y alcohol
+        double volumen = rs.getDouble("volumen_litros");
+        if (!rs.wasNull()) p.setVolumenLitros(volumen);
+        double porcentaje = rs.getDouble("porcentaje_alcohol");
+        if (!rs.wasNull()) p.setPorcentajeAlcohol(porcentaje);
 
         return p;
     }

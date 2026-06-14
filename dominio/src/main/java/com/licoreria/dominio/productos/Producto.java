@@ -11,7 +11,9 @@ public class Producto {
     private String imagenURL;
     private Double volumenLitros;
     private Double porcentajeAlcohol;
+    private Categoria categoria;
     private List<Impuesto> impuestos;
+    private Marca marca;
 
     public Producto() {
     }
@@ -95,4 +97,8 @@ public class Producto {
     public void setImpuestos(List<Impuesto> impuestos) {
         this.impuestos = impuestos;
     }
+    public Categoria getCategoria() { return categoria; }
+    public void setCategoria(Categoria categoria) { this.categoria = categoria; }
+    public Marca getMarca() { return marca; }
+    public void setMarca(Marca marca) { this.marca = marca; }
 }
