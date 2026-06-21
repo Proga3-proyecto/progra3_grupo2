@@ -124,13 +124,13 @@ public class DriveDriver {
             throw e;
         }
     }
-//    public static void main(String[] args) {
-//        try {
-//            System.out.println("Iniciando autorización manual...");
-//            Drive service = getInstance();
-//            System.out.println("¡Autorización exitosa! El token permanente se ha guardado en: " + tokensDirectoryPath);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public static void main(String[] args) {
+        try {
+            System.out.println("Iniciando autorización manual...");
+            Drive service = getInstance();
+            System.out.println("¡Autorización exitosa! El token permanente se ha guardado en: " + tokensDirectoryPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

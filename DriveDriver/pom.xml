@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>DriveDriver</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <groupId>com.licoreria.DriveDriver</groupId>
 
     <dependencies>
         <dependency>

@@ -66,20 +66,14 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.licoreria.driveService</groupId>
-            <artifactId>DriveService</artifactId>
+            <groupId>com.licoreria.DriveDriver</groupId>
+            <artifactId>DriveDriver</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.licoreria</groupId>
             <artifactId>SupabaseDriver</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.licoreria</groupId>
-            <artifactId>DriveDriver</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

@@ -49,7 +49,7 @@ public class ProductoBLImpl implements ProductoBL {
             producto.setMarca(daoMarca.get(con, producto.getId()));
             producto.setCategorias(daoCategoria.getAllByProducto(con, producto));
             producto.setImagenes(imagenDAO.getAllByProduct(con, producto));
-            return null;
+            return producto;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
