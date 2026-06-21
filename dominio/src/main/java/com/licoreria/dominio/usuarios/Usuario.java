@@ -1,61 +1,27 @@
 package com.licoreria.dominio.usuarios;
 
-
-import com.licoreria.dominio.pedidos.Pedido;
-
 import java.util.Date;
-import java.util.List;
 
-public abstract class Usuario {
-    private long id;
-    private List<Pedido> historialPedidos;
+public class Usuario {
+    private Integer idUsuario;
     private String dni;
     private String nombre;
     private String apellidoCompleto;
-    private Date fechaNacimiento;
-    private Date fechaCreacionCuenta;
     private String correo;
-    private String contraseniaHash;
-    private String telefono;
-    private EstadoCuenta estado;
+    private String contrasenaHash;
+    private EstadoUsuario estado;
+    private Date createdAt;
+    private Date updatedAt;
 
-    public Usuario() {
+    public Usuario(){
+
+    }
+    public Integer getIdUsuario() {
+        return idUsuario;
     }
 
-
-    public Usuario(
-            String dni,
-            String nombre,
-            String correo,
-            String telefono,
-            String apellidoCompleto,
-            Date fechaNacimiento,
-            String contraseniaHash) {
-
-        this.dni = dni;
-        this.nombre = nombre;
-        this.correo = correo;
-        this.telefono = telefono;
-        this.apellidoCompleto = apellidoCompleto;
-        this.fechaNacimiento = fechaNacimiento;
-        this.contraseniaHash = contraseniaHash;
-        this.estado = EstadoCuenta.ACTIVA;
-    }
-
-    public List<Pedido> getHistorialPedidos() {
-        return historialPedidos;
-    }
-
-    public void setHistorialPedidos(List<Pedido> historialPedidos) {
-        this.historialPedidos = historialPedidos;
-    }
-
-    public long getId() {
-        return this.id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
+    public void setIdUsuario(Integer idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
     public String getDni() {
@@ -82,22 +48,6 @@ public abstract class Usuario {
         this.apellidoCompleto = apellidoCompleto;
     }
 
-    public Date getFechaNacimiento() {
-        return fechaNacimiento;
-    }
-
-    public void setFechaNacimiento(Date fechaNacimiento) {
-        this.fechaNacimiento = fechaNacimiento;
-    }
-
-    public Date getFechaCreacionCuenta() {
-        return fechaCreacionCuenta;
-    }
-
-    public void setFechaCreacionCuenta(Date fechaCreacionCuenta) {
-        this.fechaCreacionCuenta = fechaCreacionCuenta;
-    }
-
     public String getCorreo() {
         return correo;
     }
@@ -106,27 +56,37 @@ public abstract class Usuario {
         this.correo = correo;
     }
 
-    public String getContraseniaHash() {
-        return contraseniaHash;
+    public String getContrasenaHash() {
+        return contrasenaHash;
     }
 
-    public void setContraseniaHash(String contraseniaHash) {
-        this.contraseniaHash = contraseniaHash;
+    public void setContrasenaHash(String contrasenaHash) {
+        this.contrasenaHash = contrasenaHash;
     }
 
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-
-    public EstadoCuenta getEstado() {
+    public EstadoUsuario getEstado() {
         return estado;
     }
 
-    public void setEstado(EstadoCuenta estado) {
+    public void setEstado(EstadoUsuario estado) {
         this.estado = estado;
     }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+
 }

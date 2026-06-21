@@ -1,0 +1,146 @@
+package com.licoreria.dao.catalogo;
+
+import com.licoreria.dao.DAOUtils;
+import com.licoreria.dominio.catalogo.ElementoReceta;
+import com.licoreria.dominio.catalogo.Producto;
+import com.licoreria.dominio.catalogo.Receta;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+public class RecetaDAOImpl implements RecetaDAO {
+
+    @Override
+    public Receta get(Connection con, Integer id) throws SQLException {
+        final String sql = "SELECT id_receta, nombre, descripcion, instrucciones, descuento, precio, precio_final " +
+                "FROM Receta WHERE id_receta = ?";
+
+        Receta receta = DAOUtils.get(sql, con, (ps) -> ps.setInt(1, id), this::mapearReceta);
+
+        if (receta != null) {
+            cargarElementos(con, receta);
+        }
+        return receta;
+    }
+
+    @Override
+    public List<Receta> getAll(Connection con) throws SQLException {
+        final String sql = "SELECT id_receta, nombre, descripcion, instrucciones, descuento, precio, precio_final " +
+                "FROM Receta";
+
+        List<Receta> recetas = DAOUtils.getAll(sql, con, this::mapearReceta);
+
+        for (Receta receta : recetas) {
+            cargarElementos(con, receta);
+        }
+        return recetas;
+    }
+
+    @Override
+    public Receta save(Connection con, Receta receta) throws SQLException {
+        final String sql = "INSERT INTO Receta (nombre, descripcion, instrucciones, descuento, precio, precio_final) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
+
+        DAOUtils.save(sql, con, (ps) -> {
+            prepararDeclaracion(ps, receta);
+        }, (rs) -> {
+            receta.setId(rs.getInt(1));
+        });
+
+        if (receta.getId() != null && receta.getElementos() != null && !receta.getElementos().isEmpty()) {
+            guardarElementos(con, receta);
+        }
+
+        return receta;
+    }
+
+    @Override
+    public Receta update(Connection con, Receta receta) throws SQLException {
+        final String sql = "UPDATE Receta SET nombre = ?, descripcion = ?, instrucciones = ?, descuento = ?, " +
+                "precio = ?, precio_final = ? WHERE id_receta = ?";
+
+        DAOUtils.update(sql, con, (ps) -> {
+            prepararDeclaracion(ps, receta);
+            ps.setInt(7, receta.getId());
+        });
+
+        eliminarElementos(con, receta.getId());
+        if (receta.getElementos() != null && !receta.getElementos().isEmpty()) {
+            guardarElementos(con, receta);
+        }
+
+        return receta;
+    }
+
+    @Override
+    public void remove(Connection con, Receta receta) throws SQLException {
+        eliminarElementos(con, receta.getId());
+
+        final String sql = "DELETE FROM Receta WHERE id_receta = ?";
+        DAOUtils.delete(sql, con, (ps) -> {
+            ps.setInt(1, receta.getId());
+        });
+    }
+
+    private void cargarElementos(Connection con, Receta receta) throws SQLException {
+        final String sqlElemento = "SELECT id_elemento_receta, id_producto, cantidad FROM Elemento_Receta WHERE id_receta = ?";
+
+        List<ElementoReceta> elementos = DAOUtils.getAll(sqlElemento, con,
+                (ps) -> ps.setInt(1, receta.getId()),
+                (rs) -> {
+                    ElementoReceta ele = new ElementoReceta();
+                    ele.setId(rs.getInt("id_elemento_receta"));
+                    ele.setReceta(receta);
+                    ele.setCantidad(rs.getDouble("cantidad"));
+
+                    Producto p = new Producto();
+                    p.setId(rs.getInt("id_producto"));
+                    ele.setProducto(p);
+                    return ele;
+                }
+        );
+        receta.setElementos(elementos);
+    }
+
+    private void guardarElementos(Connection con, Receta receta) throws SQLException {
+        final String sqlElemento = "INSERT INTO Elemento_Receta (id_receta, id_producto, cantidad) VALUES (?, ?, ?)";
+        for (ElementoReceta ele : receta.getElementos()) {
+            DAOUtils.save(sqlElemento, con, (ps) -> {
+                ps.setInt(1, receta.getId());
+                ps.setInt(2, ele.getProducto().getId());
+                ps.setDouble(3, ele.getCantidad());
+            }, (rs) -> {
+                ele.setId(rs.getInt(1));
+            });
+        }
+    }
+
+    private void eliminarElementos(Connection con, Integer idReceta) throws SQLException {
+        final String sql = "DELETE FROM Elemento_Receta WHERE id_receta = ?";
+        DAOUtils.delete(sql, con, (ps) -> ps.setInt(1, idReceta));
+    }
+
+    private Receta mapearReceta(ResultSet rs) throws SQLException {
+        Receta receta = new Receta();
+        receta.setId(rs.getInt("id_receta"));
+        receta.setNombre(rs.getString("nombre"));
+        receta.setDescripcion(rs.getString("descripcion"));
+        receta.setInstrucciones(rs.getString("instrucciones"));
+        receta.setDescuento(rs.getDouble("descuento"));
+        receta.setPrecio(rs.getDouble("precio"));
+        receta.setPrecioFinal(rs.getDouble("precio_final"));
+        return receta;
+    }
+
+    private void prepararDeclaracion(PreparedStatement ps, Receta receta) throws SQLException {
+        ps.setString(1, receta.getNombre());
+        ps.setString(2, receta.getDescripcion());
+        ps.setString(3, receta.getInstrucciones());
+        ps.setDouble(4, receta.getDescuento());
+        ps.setDouble(5, receta.getPrecio());
+        ps.setDouble(6, receta.getPrecioFinal());
+    }
+}
