@@ -93,8 +93,7 @@ public class ProductosRS {
     @Path("/{id}")
     public Response eliminar(@PathParam("id") int id) {
         try {
-            Producto producto = productoBO.get(id);
-            productoBO.delete(producto);
+            productoBO.delete(id);
             return Response.noContent().build();
         } catch (ValidationException ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\":\"" + ex.getMessage() + "\"}").build();
@@ -107,7 +106,7 @@ public class ProductosRS {
     }
 
     @POST
-    @Path("/{id}/subir")
+    @Path("/{id}/imagen")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response subirImagen(@PathParam("id") int id, @FormDataParam("archivo") InputStream archivo, @FormDataParam("archivo") FormDataContentDisposition detalle) {
         Producto producto = productoBO.get(id);
@@ -117,7 +116,6 @@ public class ProductosRS {
         }
         try {
             String nombre = detalle.getFileName();
-            //supabase.upload(nombre, archivo);
             String url = DriveDriver.uploadInputStream(archivo, nombre, "image/png", "1d-vRhALF4Myiz4BdeVqhKwEksfdokRca");
             productoBO.agregarImagen(producto, url);
         } catch (Exception e) {
@@ -127,8 +125,19 @@ public class ProductosRS {
         return Response.ok("Archivo recibido: ").build();
     }
 
+    @DELETE
+    @Path("/{id}/imagen/{idImagen}")
+    public Response eliminarImagen(@PathParam("id") int idProducto, @PathParam("idImagen") int idImagen) {
+        try {
+            productoBO.removerImagen(idProducto, idImagen);
+            return Response.ok("Imagen eliminada: ").build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al subir a Drive: " + e.getMessage()).build();
+        }
+    }
+
     @POST
-    @Path("/{id}/subirPrincipal")
+    @Path("/{id}/imagenPrincipal")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response subirImagenPrincipal(@PathParam("id") int id, @FormDataParam("archivo") InputStream archivo, @FormDataParam("archivo") FormDataContentDisposition detalle) {
         Producto producto = productoBO.get(id);

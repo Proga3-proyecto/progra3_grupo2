@@ -7,13 +7,17 @@ import com.licoreria.dominio.catalogo.Receta;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 public interface RecetaDAO extends BaseDAO<Receta, Integer> {
     void cargarImagen(Connection con, Receta receta, Imagen imagen) throws SQLException;
 
     void asignarImagenPrincipal(Connection con, Receta receta, Imagen imagen) throws SQLException;
 
-    public void asignarCategoria(Connection con, Receta receta, Categoria categoria) throws SQLException;
+    void asignarCategoria(Connection con, Receta receta, Categoria categoria) throws SQLException;
 
-    public void removerCategoria(Connection con, Receta receta, Categoria categoria) throws SQLException;
+    void removerCategoria(Connection con, Receta receta, Categoria categoria) throws SQLException;
+
+    List<Receta> getRecetasPorCliente(Connection con, int idCliente) throws SQLException;
+
 }

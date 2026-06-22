@@ -14,6 +14,7 @@ public interface ProductoDAO extends BaseDAO<Producto, Integer> {
     void cargarImagen(Connection con, Producto producto, Imagen imagen) throws SQLException;
 
     void removerImagen(Connection con, Producto producto, Imagen imagen) throws SQLException;
+    void removerImagen(Connection con, int idProducto, int idImagen) throws SQLException;
 
     void asignarImagenPrincipal(Connection con, Producto producto, Imagen imagen) throws SQLException;
 

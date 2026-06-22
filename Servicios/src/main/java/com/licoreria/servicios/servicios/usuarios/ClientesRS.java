@@ -3,6 +3,7 @@ package com.licoreria.servicios.servicios.usuarios;
 import com.licoreria.BusinessLayer.usuarios.ClienteBL;
 import com.licoreria.BusinessLayer.usuarios.ClienteBLImpl;
 import com.licoreria.dominio.catalogo.Producto;
+import com.licoreria.dominio.catalogo.Receta;
 import com.licoreria.dominio.usuarios.Cliente;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -66,8 +67,8 @@ public class ClientesRS {
     }
 
     @GET
-    @Path("/{id}/carrito")
-    public Response obtenerCarrito(@PathParam("id") int id) {
+    @Path("/{id}/carritoProductos")
+    public Response obtenerCarritoProductos(@PathParam("id") int id) {
         try {
             List<Producto> productos = clienteBL.getProductosEnCarrito(id);
             return Response.ok(productos).build();
@@ -77,4 +78,18 @@ public class ClientesRS {
                     .build();
         }
     }
+
+    @GET
+    @Path("/{id}/carritoRecetas")
+    public Response obtenerCarritoRecetas(@PathParam("id") int id) {
+        try {
+            List<Receta> recetas = clienteBL.getRecetasEnCarrito(id);
+            return Response.ok(recetas).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\":\"Error al obtener las recetas del carrito: " + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
+
 }

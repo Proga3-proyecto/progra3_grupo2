@@ -185,4 +185,24 @@ public class RecetaDAOImpl implements RecetaDAO {
             ps.setInt(2, categoria.getId());
         });
     }
+
+    @Override
+    public List<Receta> getRecetasPorCliente(Connection con, int idCliente) throws SQLException {
+        final String sql = "SELECT r.id_receta, r.nombre, r.descripcion, r.instrucciones, r.descuento, r.precio, r.precio_final " +
+                "FROM Receta r " +
+                "INNER JOIN Detalle_Receta dr ON r.id_receta = dr.id_receta " +
+                "WHERE dr.id_cliente_carrito = ?";
+
+        List<Receta> recetas = DAOUtils.getAll(sql, con,
+                (ps) -> ps.setInt(1, idCliente),
+                this::mapearReceta
+        );
+
+        // Cargamos los productos que conforman cada receta obtenida
+        for (Receta receta : recetas) {
+            cargarElementos(con, receta);
+        }
+
+        return recetas;
+    }
 }

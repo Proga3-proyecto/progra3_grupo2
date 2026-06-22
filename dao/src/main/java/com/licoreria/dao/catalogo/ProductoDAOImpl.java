@@ -141,6 +141,15 @@ public class ProductoDAOImpl implements ProductoDAO {
     }
 
     @Override
+    public void removerImagen(Connection con, int idProducto, int idImagen) throws SQLException {
+        final String sql = "DELETE FROM ProductoImagen WHERE id_producto = ? AND id_imagen = ?";
+        DAOUtils.delete(sql, con, (ps) -> {
+            ps.setInt(1, idProducto);
+            ps.setInt(2, idImagen);
+        });
+    }
+
+    @Override
     public void asignarImagenPrincipal(Connection con, Producto producto, Imagen imagen) throws SQLException {
         final String resetSql = "UPDATE ProductoImagen SET principal = false WHERE id_producto = ?";
         DAOUtils.update(resetSql, con, (ps) -> {

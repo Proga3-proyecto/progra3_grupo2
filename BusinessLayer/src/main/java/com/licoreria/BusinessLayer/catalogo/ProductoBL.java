@@ -10,10 +10,12 @@ public interface ProductoBL {
     List<Producto> getAll();
     Producto get(int id);
     void delete(Producto producto);
+    void delete(int id);
     Producto save(Producto producto);
     Producto update(Producto producto);
     void agregarImagen(Producto producto,String url);
     void agregarImagenPrincipal(Producto producto,String url);
+    void removerImagen(int idProducto, int imagen);
     void eliminarCategoria(Producto producto, String categoria);
     void agregarCategoria(Producto producto, Categoria categoria);
     void actualizarMarca(Producto producto, Marca categoria);

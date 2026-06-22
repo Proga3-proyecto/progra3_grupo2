@@ -65,6 +65,19 @@ public class ProductoBLImpl implements ProductoBL {
     }
 
     @Override
+    public void delete(int id) {
+        try (Connection con = DBManager.getInstance().getConnection()) {
+            Producto producto = this.get(id);
+            if (producto == null) {
+                throw new RuntimeException("No se encontroProducto");
+            }
+            productoDAO.remove(con, producto);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public Producto save(Producto producto) {
         try {
             Connection con = TransactionContext.getConnection();
@@ -174,6 +187,24 @@ public class ProductoBLImpl implements ProductoBL {
     }
 
     @Override
+    public void removerImagen(int idProducto, int idImagen) {
+        try {
+            Connection con = TransactionContext.getConnection();
+            try {
+                productoDAO.removerImagen(con, idProducto, idImagen);
+                TransactionContext.commit();
+            } catch (SQLException e) {
+                TransactionContext.rollback();
+                throw new RuntimeException(e);
+            } finally {
+                TransactionContext.close();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void eliminarCategoria(Producto producto, String nombreCategoria) {
         try {
             Connection con = TransactionContext.getConnection();
@@ -223,7 +254,7 @@ public class ProductoBLImpl implements ProductoBL {
             try {
 
                 Marca m = daoMarca.get(con, marca.getNombre());
-                if(m == null)
+                if (m == null)
                     daoMarca.save(con, marca);
                 else marca = m;
 
