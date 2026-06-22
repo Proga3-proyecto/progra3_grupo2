@@ -1,11 +1,12 @@
-package com.licoreria.servicios.servicios;
+package com.licoreria.servicios.servicios.catologo;
 
 import com.licoreria.BusinessLayer.EntityNotFoundException;
 import com.licoreria.BusinessLayer.ValidationException;
-import com.licoreria.BusinessLayer.productos.ProductoBL;
-import com.licoreria.BusinessLayer.productos.ProductoBLImpl;
+import com.licoreria.BusinessLayer.catalogo.ProductoBL;
+import com.licoreria.BusinessLayer.catalogo.ProductoBLImpl;
 import com.licoreria.DriveDriver.DriveDriver;
 import com.licoreria.dominio.catalogo.Categoria;
+import com.licoreria.dominio.catalogo.Marca;
 import com.licoreria.dominio.catalogo.Producto;
 
 import jakarta.servlet.annotation.MultipartConfig;
@@ -147,14 +148,14 @@ public class ProductosRS {
     }
 
     @DELETE
-    @Path("/{id}/categoria")
-    public Response eliminarCategoria(@PathParam("id") int id, Categoria categoria) {
+    @Path("/{id}/categoria/{categoria}")
+    public Response eliminarCategoria(@PathParam("id") int id, @PathParam("categoria") String nombreCategoria) {
         Producto producto = productoBO.get(id);
         if (producto == null) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No encontro el producto").build();
         }
         try {
-            productoBO.eliminarCategoria(producto, categoria);
+            productoBO.eliminarCategoria(producto, nombreCategoria);
         } catch (RuntimeException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
@@ -164,6 +165,7 @@ public class ProductosRS {
 
     @POST
     @Path("/{id}/categoria")
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response agregarCategoria(@PathParam("id") int id, Categoria categoria) {
         Producto producto = productoBO.get(id);
         if (producto == null) {
@@ -175,6 +177,21 @@ public class ProductosRS {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
-        return Response.ok("Categoria eliminada ").build();
+        return Response.ok("Categoria agregada ").build();
+    }
+
+    @PUT
+    @Path("/{id}/marca")
+    public Response cambiarMarca(@PathParam("id") int id, Marca marca) {
+        Producto producto = productoBO.get(id);
+        if (producto == null) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No encontro el producto").build();
+        }
+        try {
+            productoBO.actualizarMarca(producto, marca);
+        } catch (RuntimeException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
+        }
+        return Response.ok("marca actualizada ").build();
     }
 }

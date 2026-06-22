@@ -1,9 +1,7 @@
 package com.licoreria.dao.catalogo;
 
 import com.licoreria.dao.DAOUtils;
-import com.licoreria.dominio.catalogo.ElementoReceta;
-import com.licoreria.dominio.catalogo.Producto;
-import com.licoreria.dominio.catalogo.Receta;
+import com.licoreria.dominio.catalogo.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -142,5 +140,49 @@ public class RecetaDAOImpl implements RecetaDAO {
         ps.setDouble(4, receta.getDescuento());
         ps.setDouble(5, receta.getPrecio());
         ps.setDouble(6, receta.getPrecioFinal());
+    }
+
+    @Override
+    public void cargarImagen(Connection con, Receta receta, Imagen imagen) throws SQLException {
+        final String sql = "INSERT INTO RecetaImagen (id_receta, id_imagen, principal) VALUES (?, ?, ?)";
+        DAOUtils.save(sql, con, (ps) -> {
+            ps.setInt(1, receta.getId());
+            ps.setInt(2, imagen.getId());
+            ps.setBoolean(3, false); // No es principal por defecto
+        }, (rs) -> {});
+    }
+
+    @Override
+    public void asignarImagenPrincipal(Connection con, Receta receta, Imagen imagen) throws SQLException {
+        // Primero, quitar la anterior principal
+        final String sqlUpdate = "UPDATE RecetaImagen SET principal = false WHERE id_receta = ?";
+        DAOUtils.update(sqlUpdate, con, (ps) -> ps.setInt(1, receta.getId()));
+
+        // Luego insertar o actualizar la nueva principal
+        final String sqlInsert = "INSERT INTO RecetaImagen (id_receta, id_imagen, principal) VALUES (?, ?, true) " +
+                "ON DUPLICATE KEY UPDATE principal = true";
+        DAOUtils.save(sqlInsert, con, (ps) -> {
+            ps.setInt(1, receta.getId());
+            ps.setInt(2, imagen.getId());
+        }, (rs) -> {});
+    }
+
+    // En RecetaDAOImpl.java
+    @Override
+    public void asignarCategoria(Connection con, Receta receta, Categoria categoria) throws SQLException {
+        final String sql = "INSERT INTO Receta_Categoria (id_receta, id_categoria) VALUES (?, ?)";
+        DAOUtils.update(sql, con, (ps) -> {
+            ps.setInt(1, receta.getId());
+            ps.setInt(2, categoria.getId());
+        });
+    }
+
+    @Override
+    public void removerCategoria(Connection con, Receta receta, Categoria categoria) throws SQLException {
+        final String sql = "DELETE FROM Receta_Categoria WHERE id_receta = ? AND id_categoria = ?";
+        DAOUtils.delete(sql, con, (ps) -> {
+            ps.setInt(1, receta.getId());
+            ps.setInt(2, categoria.getId());
+        });
     }
 }

@@ -4,6 +4,7 @@ import com.licoreria.dao.DAOUtils;
 import com.licoreria.dominio.catalogo.Imagen;
 import com.licoreria.dominio.catalogo.Marca;
 import com.licoreria.dominio.catalogo.Producto;
+import com.licoreria.dominio.catalogo.Receta;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -90,6 +91,22 @@ public class ImagenDAOImpl implements ImagenDAO {
                 "WHERE pi.id_producto = ?";
         return DAOUtils.getAll(sql, con, (ps) -> {
             ps.setInt(1, producto.getId());
+        }, (rs) -> {
+            Imagen imagen = new Imagen();
+            imagen.setId(rs.getInt("id_imagen"));
+            imagen.setUrl(rs.getString("url"));
+            return imagen;
+        });
+    }
+    @Override
+    public List<Imagen> getAllByReceta(Connection con, Receta receta) throws SQLException {
+        final String sql = "SELECT i.id_imagen, i.url " +
+                "FROM RecetaImagen ri " +
+                "INNER JOIN Imagen i ON ri.id_imagen = i.id_imagen " +
+                "WHERE ri.id_receta = ?";
+
+        return DAOUtils.getAll(sql, con, (ps) -> {
+            ps.setInt(1, receta.getId());
         }, (rs) -> {
             Imagen imagen = new Imagen();
             imagen.setId(rs.getInt("id_imagen"));

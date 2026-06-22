@@ -170,4 +170,16 @@ public class ProductoDAOImpl implements ProductoDAO {
             ps.setInt(2, categoria.getId());
         });
     }
+
+    @Override
+    public List<Producto> getProductosPorCliente(Connection con, int idCliente) throws SQLException {
+        final String sql = "SELECT p.id_producto, p.nombre, p.precio, p.precio_final, p.stock, " +
+                "p.descuento, p.volumen_litros, p.porcentaje_alcohol, p.id_impuesto, " +
+                "p.id_impuesto_alcohol, p.id_marca " +
+                "FROM Producto p " +
+                "INNER JOIN Detalle_Producto dp ON p.id_producto = dp.id_producto " +
+                "WHERE dp.id_cliente_carrito = ?";
+
+        return DAOUtils.getAll(sql, con, (ps) -> ps.setInt(1, idCliente), this::mapProduct);
+    }
 }

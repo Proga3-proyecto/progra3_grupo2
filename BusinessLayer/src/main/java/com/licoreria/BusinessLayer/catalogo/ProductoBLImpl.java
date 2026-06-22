@@ -1,4 +1,4 @@
-package com.licoreria.BusinessLayer.productos;
+package com.licoreria.BusinessLayer.catalogo;
 
 import com.licoreria.DBmanager.DBManager;
 import com.licoreria.DBmanager.TransactionContext;
@@ -174,10 +174,14 @@ public class ProductoBLImpl implements ProductoBL {
     }
 
     @Override
-    public void eliminarCategoria(Producto producto, Categoria categoria) {
+    public void eliminarCategoria(Producto producto, String nombreCategoria) {
         try {
             Connection con = TransactionContext.getConnection();
+
             try {
+                Categoria categoria = daoCategoria.get(con, nombreCategoria);
+                if (categoria == null)
+                    throw new RuntimeException("No se encontro categoria");
                 productoDAO.removerCategoria(con, producto, categoria);
                 TransactionContext.commit();
             } catch (SQLException e) {
@@ -196,7 +200,38 @@ public class ProductoBLImpl implements ProductoBL {
         try {
             Connection con = TransactionContext.getConnection();
             try {
+                Categoria cat = daoCategoria.get(con, categoria.getNombre());
+                if (cat == null)
+                    daoCategoria.save(con, categoria);
                 productoDAO.asignarCategoria(con, producto, categoria);
+                TransactionContext.commit();
+            } catch (SQLException e) {
+                TransactionContext.rollback();
+                throw new RuntimeException(e);
+            } finally {
+                TransactionContext.close();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void actualizarMarca(Producto producto, Marca marca) {
+        try {
+            Connection con = TransactionContext.getConnection();
+            try {
+
+                Marca m = daoMarca.get(con, marca.getNombre());
+                if(m == null)
+                    daoMarca.save(con, marca);
+                else marca = m;
+
+                producto.setMarca(marca);
+
+                productoDAO.update(con, producto);
+
+
                 TransactionContext.commit();
             } catch (SQLException e) {
                 TransactionContext.rollback();

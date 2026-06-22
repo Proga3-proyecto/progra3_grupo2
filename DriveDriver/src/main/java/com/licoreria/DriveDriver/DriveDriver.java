@@ -26,7 +26,6 @@ public class DriveDriver {
     private static final String CREDENTIALS_FILE_PATH = "/drive-credentials.json";
     private static final String APPLICATION_NAME = "allasi_licores";
 
-    // MODIFICADO: Ya no es final, se asignará dinámicamente
     private static String tokensDirectoryPath;
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
@@ -47,15 +46,12 @@ public class DriveDriver {
         }
     }
 
-    // NUEVO: Método para que el entorno web configure la ruta exacta del proyecto
     public static void initTokensPath(String realPath) {
         tokensDirectoryPath = realPath;
     }
 
     public static synchronized Drive getInstance() {
         if (instance == null) {
-            // Respaldo: Si no se ha inicializado desde la web (por ejemplo, al ejecutar el main),
-            // usa la ruta local por defecto del proyecto.
             if (tokensDirectoryPath == null) {
                 tokensDirectoryPath = System.getProperty("user.dir") + "/drive_tokens_allasi";
             }
