@@ -105,4 +105,18 @@ public class AdminDAOImpl implements AdminDAO {
 
         return admin;
     }
+
+    @Override
+    public Admin getPorCorreo(Connection con, String correo, String contrasena) throws SQLException {
+        final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
+                "a.fecha_inicio_admin " +
+                "FROM Admin a " +
+                "INNER JOIN Usuario u ON a.id_usuario = u.id_usuario " +
+                "WHERE u.correo = ? AND u.contrasena_hash = ?";
+
+        return DAOUtils.get(sql, con, (ps) -> {
+            ps.setString(1, correo);
+            ps.setString(2, contrasena);
+        }, this::mapearAdmin);
+    }
 }

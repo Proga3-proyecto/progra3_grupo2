@@ -91,4 +91,12 @@ public class AdminBLImpl implements AdminBL {
             throw new RuntimeException("Error al eliminar administrador", e);
         }
     }
+    @Override
+    public Admin validarCredenciales(String usuario, String password){
+        try (Connection con = DBManager.getInstance().getConnection()) {
+            return adminDAO.getPorCorreo(con, usuario, password);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener administrador", e);
+        }
+    }
 }

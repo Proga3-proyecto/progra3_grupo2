@@ -7,6 +7,8 @@
     <file url="file://$PROJECT_DIR$/BusinessLayer/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/DBManager/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/DBManager/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/DTO/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/DTO/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/DriveDriver/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/DriveDriver/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/DriveService/src/main/java" charset="UTF-8" />
