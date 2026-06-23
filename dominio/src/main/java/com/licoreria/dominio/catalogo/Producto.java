@@ -17,13 +17,20 @@ public class Producto {
     private AlcoholImpuesto impuestoAlcohol;
     private List<Categoria> categorias;
     private List<Imagen> imagenes;
+    private String descripcion;
 
     public Producto() {
         categorias = new ArrayList<>();
         imagenes = new ArrayList<>();
     }
 
+    public String getDescripcion() {
+        return descripcion;
+    }
 
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
 
 
     public Integer getId() {

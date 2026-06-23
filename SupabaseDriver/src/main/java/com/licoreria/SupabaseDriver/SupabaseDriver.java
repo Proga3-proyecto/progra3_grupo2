@@ -24,26 +24,20 @@ public class SupabaseDriver {
         supabaseUrl = rs.getString("supabase.url").replaceAll("/$", "");
         apiKey = rs.getString("supabase.key");
         bucket = rs.getString("supabase.bucket");
-
-        // Inicializamos el cliente forzando la lectura de certificados de Windows
         client = buildWindowsSSLClient();
     }
 
     private HttpClient buildWindowsSSLClient() {
         try {
-            // 1. Cargamos la bóveda de certificados nativa de Windows
             KeyStore trustStore = KeyStore.getInstance("Windows-ROOT");
             trustStore.load(null, null);
 
-            // 2. Creamos un administrador de confianza basado en esa bóveda
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(trustStore);
 
-            // 3. Fabricamos un contexto SSL estricto y seguro
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, tmf.getTrustManagers(), null);
 
-            // 4. Inyectamos este contexto directamente en el cliente
             return HttpClient.newBuilder()
                     .sslContext(sslContext)
                     .build();
@@ -77,6 +71,45 @@ public class SupabaseDriver {
         }
 
         return getPublicUrl(encodedFileName);
+    }
+
+    public void delete(String fileName) throws Exception {
+
+        String encodedFileName =
+                URLEncoder.encode(
+                                fileName,
+                                StandardCharsets.UTF_8)
+                        .replace("+", "%20");
+
+        String path =
+                bucket + "/" + encodedFileName;
+
+        HttpRequest request =
+                HttpRequest.newBuilder()
+                        .uri(URI.create(
+                                supabaseUrl +
+                                        "/storage/v1/object/" +
+                                        path))
+                        .header("Authorization",
+                                "Bearer " + apiKey)
+                        .header("apikey", apiKey)
+                        .DELETE()
+                        .build();
+
+        HttpResponse<String> response =
+                client.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200
+                && response.statusCode() != 204) {
+
+            throw new RuntimeException(
+                    "Error eliminando archivo HTTP "
+                            + response.statusCode()
+                            + ": "
+                            + response.body());
+        }
     }
 
     public String getPublicUrl(String fileName) {

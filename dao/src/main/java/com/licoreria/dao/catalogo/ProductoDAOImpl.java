@@ -9,7 +9,7 @@ import java.util.List;
 public class ProductoDAOImpl implements ProductoDAO {
     @Override
     public Producto get(Connection con, Integer id) throws SQLException {
-        final String sql = "SELECT id_producto, nombre, precio, precio_final, stock, descuento, volumen_litros, " +
+        final String sql = "SELECT id_producto, nombre,descripcion, precio, precio_final, stock, descuento, volumen_litros, " +
                 "porcentaje_alcohol, id_impuesto, id_impuesto_alcohol, id_marca " +
                 "FROM Producto WHERE id_producto = ?";
 
@@ -18,7 +18,7 @@ public class ProductoDAOImpl implements ProductoDAO {
 
     @Override
     public List<Producto> getAll(Connection con) throws SQLException {
-        final String sql = "SELECT id_producto, nombre, precio, precio_final, stock, descuento, volumen_litros, " +
+        final String sql = "SELECT id_producto, nombre,descripcion, precio, precio_final, stock, descuento, volumen_litros, " +
                 "porcentaje_alcohol, id_impuesto, id_impuesto_alcohol, id_marca " +
                 "FROM Producto";
 
@@ -27,7 +27,7 @@ public class ProductoDAOImpl implements ProductoDAO {
 
     @Override
     public Producto save(Connection con, Producto producto) throws SQLException {
-        final String sql = "INSERT INTO Producto (nombre, precio, precio_final, stock, descuento, volumen_litros, " +
+        final String sql = "INSERT INTO Producto (nombre,descripcion, precio, precio_final, stock, descuento, volumen_litros, " +
                 "porcentaje_alcohol, id_impuesto, id_impuesto_alcohol, id_marca) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -42,13 +42,13 @@ public class ProductoDAOImpl implements ProductoDAO {
 
     @Override
     public Producto update(Connection con, Producto producto) throws SQLException {
-        final String sql = "UPDATE Producto SET nombre = ?, precio = ?, precio_final = ?, stock = ?, descuento = ?, " +
+        final String sql = "UPDATE Producto SET nombre = ?,descripcion = ?, precio = ?, precio_final = ?, stock = ?, descuento = ?, " +
                 "volumen_litros = ?, porcentaje_alcohol = ?, id_impuesto = ?, id_impuesto_alcohol = ?, " +
                 "id_marca = ? WHERE id_producto = ?";
 
         DAOUtils.update(sql, con, (ps) -> {
             prepararDeclaracion(ps, producto);
-            ps.setInt(11, producto.getId());
+            ps.setInt(12, producto.getId());
         });
 
         return producto;
@@ -66,6 +66,7 @@ public class ProductoDAOImpl implements ProductoDAO {
         Producto producto = new Producto();
         producto.setId(rs.getInt("id_producto"));
         producto.setNombre(rs.getString("nombre"));
+        producto.setDescripcion(rs.getString("descripcion"));
         producto.setPrecio(rs.getDouble("precio"));
         producto.setPrecioFinal(rs.getDouble("precio_final"));
         producto.setStock(rs.getInt("stock"));
@@ -95,29 +96,30 @@ public class ProductoDAOImpl implements ProductoDAO {
 
     private void prepararDeclaracion(PreparedStatement ps, Producto producto) throws SQLException {
         ps.setString(1, producto.getNombre());
-        ps.setDouble(2, producto.getPrecio());
-        ps.setDouble(3, producto.getPrecioFinal());
-        ps.setInt(4, producto.getStock());
-        ps.setDouble(5, producto.getDescuento());
-        ps.setDouble(6, producto.getVolumenLitros());
-        ps.setDouble(7, producto.getPorcentajeAlcohol());
+        ps.setString(2, producto.getDescripcion());
+        ps.setDouble(3, producto.getPrecio());
+        ps.setDouble(4, producto.getPrecioFinal());
+        ps.setInt(5, producto.getStock());
+        ps.setDouble(6, producto.getDescuento());
+        ps.setDouble(7, producto.getVolumenLitros());
+        ps.setDouble(8, producto.getPorcentajeAlcohol());
 
         if (producto.getImpuestoBase() != null && producto.getImpuestoBase().getId() != null) {
-            ps.setInt(8, producto.getImpuestoBase().getId());
-        } else {
-            ps.setNull(8, Types.INTEGER);
-        }
-
-        if (producto.getImpuestoAlcohol() != null && producto.getImpuestoAlcohol().getId() != null) {
-            ps.setInt(9, producto.getImpuestoAlcohol().getId());
+            ps.setInt(9, producto.getImpuestoBase().getId());
         } else {
             ps.setNull(9, Types.INTEGER);
         }
 
-        if (producto.getMarca() != null && producto.getMarca().getId() != null) {
-            ps.setInt(10, producto.getMarca().getId());
+        if (producto.getImpuestoAlcohol() != null && producto.getImpuestoAlcohol().getId() != null) {
+            ps.setInt(10, producto.getImpuestoAlcohol().getId());
         } else {
             ps.setNull(10, Types.INTEGER);
+        }
+
+        if (producto.getMarca() != null && producto.getMarca().getId() != null) {
+            ps.setInt(11, producto.getMarca().getId());
+        } else {
+            ps.setNull(11, Types.INTEGER);
         }
     }
 
