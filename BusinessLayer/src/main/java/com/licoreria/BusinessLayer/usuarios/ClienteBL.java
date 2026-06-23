@@ -19,4 +19,6 @@ public interface ClienteBL {
 
     List<Producto> getProductosEnCarrito(int idCliente);
     List<Receta> getRecetasEnCarrito(int idCliente);
+    Cliente validarCredenciales(String usuario, String password);
+
 }

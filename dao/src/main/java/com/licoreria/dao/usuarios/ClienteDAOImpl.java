@@ -184,4 +184,21 @@ public class ClienteDAOImpl implements ClienteDAO {
 
         return cliente;
     }
+    @Override
+    public Cliente getPorCorreo(Connection con, String correo, String contrasena) throws SQLException {
+        final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
+                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo " +
+                "FROM Cliente c " +
+                "INNER JOIN Usuario u ON c.id_usuario = u.id_usuario " +
+                "WHERE u.correo = ? AND u.contrasena_hash = ?";
+
+        Cliente cliente = DAOUtils.get(sql, con, (ps) -> {ps.setString(1, correo); ps.setString(2, contrasena);}, (rs) -> mapearCliente(rs));
+
+        if (cliente != null) {
+            cargarDirecciones(con, cliente);
+        }
+
+        return cliente;
+    }
+
 }

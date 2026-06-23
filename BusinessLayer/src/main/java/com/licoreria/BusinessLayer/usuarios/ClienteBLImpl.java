@@ -118,4 +118,12 @@ public class ClienteBLImpl implements ClienteBL {
             throw new RuntimeException("Error al obtener recetas del carrito", e);
         }
     }
+    @Override
+    public Cliente validarCredenciales(String usuario, String password){
+        try (Connection con = DBManager.getInstance().getConnection()) {
+            return clienteDAO.getPorCorreo(con, usuario, password);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener administrador", e);
+        }
+    }
 }
