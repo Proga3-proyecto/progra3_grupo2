@@ -5,6 +5,7 @@ import com.licoreria.BusinessLayer.ValidationException;
 import com.licoreria.BusinessLayer.catalogo.ProductoBL;
 import com.licoreria.BusinessLayer.catalogo.ProductoBLImpl;
 import com.licoreria.DriveDriver.DriveDriver;
+import com.licoreria.SupabaseDriver.SupabaseDriver;
 import com.licoreria.dominio.catalogo.Categoria;
 import com.licoreria.dominio.catalogo.Marca;
 import com.licoreria.dominio.catalogo.Producto;
@@ -26,9 +27,11 @@ import java.util.List;
 public class ProductosRS {
 
     private final ProductoBL productoBO;
+    private final SupabaseDriver supabaseDriver;
 
     public ProductosRS() {
         this.productoBO = new ProductoBLImpl();
+        this.supabaseDriver = new SupabaseDriver();
     }
 
     @GET
@@ -147,7 +150,7 @@ public class ProductosRS {
         }
         String nombre = detalle.getFileName();
         try {
-            String url = DriveDriver.uploadInputStream(archivo, nombre, "image/png", "1d-vRhALF4Myiz4BdeVqhKwEksfdokRca");
+            String url = this.supabaseDriver.upload(nombre, archivo);
             productoBO.agregarImagenPrincipal(producto, url);
         } catch (Exception e) {
             e.printStackTrace();
