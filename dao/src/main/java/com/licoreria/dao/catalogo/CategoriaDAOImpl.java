@@ -3,6 +3,7 @@ package com.licoreria.dao.catalogo;
 import com.licoreria.dao.DAOUtils;
 import com.licoreria.dominio.catalogo.Categoria;
 import com.licoreria.dominio.catalogo.Producto;
+import com.licoreria.dominio.catalogo.Receta;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -40,6 +41,23 @@ public class CategoriaDAOImpl implements CategoriaDAO {
 
         return DAOUtils.getAll(sql, con, (ps) -> {
             ps.setInt(1, producto.getId());
+        }, (rs) -> {
+            Categoria categoria = new Categoria();
+            categoria.setId(rs.getInt("id_categoria"));
+            categoria.setNombre(rs.getString("nombre"));
+            return categoria;
+        });
+    }
+
+    @Override
+    public List<Categoria> getAllByReceta(Connection con, Receta receta) throws SQLException {
+        final String sql = "SELECT c.id_categoria, c.nombre " +
+                "FROM Categoria c " +
+                "INNER JOIN Receta_Categoria pc ON c.id_categoria = pc.id_categoria " +
+                "WHERE pc.id_receta = ?";
+
+        return DAOUtils.getAll(sql, con, (ps) -> {
+            ps.setInt(1, receta.getId());
         }, (rs) -> {
             Categoria categoria = new Categoria();
             categoria.setId(rs.getInt("id_categoria"));

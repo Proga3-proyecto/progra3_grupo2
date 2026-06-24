@@ -22,7 +22,13 @@ public class RecetaBLImpl implements RecetaBL {
     @Override
     public List<Receta> getAll() {
         try (Connection con = DBManager.getInstance().getConnection()) {
-            return recetaDAO.getAll(con);
+            List<Receta> recetas =  recetaDAO.getAll(con);
+            for (Receta receta: recetas){
+                receta.setCategorias(categoriaDAO.getAllByReceta(con, receta));
+                receta.setImagenes(imagenDAO.getAllByReceta(con, receta));
+            }
+
+            return recetas;
         } catch (Exception e) {
             throw new RuntimeException("Error al obtener recetas", e);
         }
@@ -31,7 +37,10 @@ public class RecetaBLImpl implements RecetaBL {
     @Override
     public Receta get(int id) {
         try (Connection con = DBManager.getInstance().getConnection()) {
-            return recetaDAO.get(con, id);
+            Receta receta =  recetaDAO.get(con, id);
+            receta.setCategorias(categoriaDAO.getAllByReceta(con, receta));
+            receta.setImagenes(imagenDAO.getAllByReceta(con, receta));
+            return receta;
         } catch (Exception e) {
             throw new RuntimeException("Error al obtener receta", e);
         }

@@ -14,11 +14,13 @@ public class Receta {
     private List<ElementoReceta> elementos;
     private List<Imagen> imagenes;
 
+
+    private List<Categoria> categorias;
+
     public Receta() {
         imagenes = new ArrayList<>();
         elementos = new ArrayList<>();
     }
-
 
     public Receta(String nombre, String descripcion, String instrucciones, double precio, double precioFinal, double descuento, List<ElementoReceta> elementos, List<Imagen> imagenes) {
         this.nombre = nombre;
@@ -29,6 +31,14 @@ public class Receta {
         this.descuento = descuento;
         this.elementos = elementos;
         this.imagenes = imagenes;
+    }
+
+    public List<Categoria> getCategorias() {
+        return categorias;
+    }
+
+    public void setCategorias(List<Categoria> categorias) {
+        this.categorias = categorias;
     }
 
     public Integer getId() {
