@@ -29,7 +29,7 @@ public class ProductoDAOImpl implements ProductoDAO {
     public Producto save(Connection con, Producto producto) throws SQLException {
         final String sql = "INSERT INTO Producto (nombre,descripcion, precio, precio_final, stock, descuento, volumen_litros, " +
                 "porcentaje_alcohol, id_impuesto, id_impuesto_alcohol, id_marca) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         DAOUtils.save(sql, con, (ps) -> {
             prepararDeclaracion(ps, producto);

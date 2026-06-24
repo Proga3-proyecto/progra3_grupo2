@@ -85,17 +85,15 @@ public class RecetaDAOImpl implements RecetaDAO {
 
     private void cargarElementos(Connection con, Receta receta) throws SQLException {
         final String sqlElemento = "SELECT id_elemento_receta, id_producto, cantidad FROM Elemento_Receta WHERE id_receta = ?";
-
+        ProductoDAO productoDAO = new ProductoDAOImpl();
         List<ElementoReceta> elementos = DAOUtils.getAll(sqlElemento, con,
                 (ps) -> ps.setInt(1, receta.getId()),
                 (rs) -> {
                     ElementoReceta ele = new ElementoReceta();
                     ele.setId(rs.getInt("id_elemento_receta"));
-                    //ele.setReceta(receta);
                     ele.setCantidad(rs.getDouble("cantidad"));
-
-                    Producto p = new Producto();
-                    p.setId(rs.getInt("id_producto"));
+                    int idProducto = rs.getInt("id_producto");
+                    Producto p = productoDAO.get(con, idProducto);
                     ele.setProducto(p);
                     return ele;
                 }
@@ -205,4 +203,6 @@ public class RecetaDAOImpl implements RecetaDAO {
 
         return recetas;
     }
+
+
 }
