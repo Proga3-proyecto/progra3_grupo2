@@ -91,7 +91,7 @@ public class RecetaDAOImpl implements RecetaDAO {
                 (rs) -> {
                     ElementoReceta ele = new ElementoReceta();
                     ele.setId(rs.getInt("id_elemento_receta"));
-                    ele.setReceta(receta);
+                    //ele.setReceta(receta);
                     ele.setCantidad(rs.getDouble("cantidad"));
 
                     Producto p = new Producto();
