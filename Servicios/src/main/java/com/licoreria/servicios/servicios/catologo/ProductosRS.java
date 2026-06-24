@@ -119,7 +119,7 @@ public class ProductosRS {
         }
         try {
             String nombre = detalle.getFileName();
-            String url = DriveDriver.uploadInputStream(archivo, nombre, "image/png", "1d-vRhALF4Myiz4BdeVqhKwEksfdokRca");
+            String url = this.supabaseDriver.upload(nombre, archivo);
             productoBO.agregarImagen(producto, url);
         } catch (Exception e) {
             e.printStackTrace();
