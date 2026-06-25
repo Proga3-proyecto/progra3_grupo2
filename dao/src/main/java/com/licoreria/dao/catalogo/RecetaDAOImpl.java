@@ -94,7 +94,6 @@ public class RecetaDAOImpl implements RecetaDAO {
 
     private void cargarElementos(Connection con, Receta receta) throws SQLException {
         final String sqlElemento = "SELECT id_elemento_receta, id_producto, cantidad FROM Elemento_Receta WHERE id_receta = ?";
-        ProductoDAO productoDAO = new ProductoDAOImpl();
         List<ElementoReceta> elementos = DAOUtils.getAll(sqlElemento, con,
                 (ps) -> ps.setInt(1, receta.getId()),
                 (rs) -> {

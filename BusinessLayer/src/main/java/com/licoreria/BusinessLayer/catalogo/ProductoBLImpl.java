@@ -37,7 +37,7 @@ public class ProductoBLImpl implements ProductoBL {
             Map<Integer, List<Categoria>> categorias = categoriaDAO.getAllByProductos(con, productosids);
             Map<Integer, Marca> marcas = marcaDAO.getAllByProductos(con, marcasIds);
             for (Producto producto : productos) {
-                producto.setMarca(marcas.get(producto.getId()));
+                producto.setMarca(marcas.get(producto.getMarca().getId()));
                 producto.setCategorias(categorias.get(producto.getId()));
                 producto.setImagenes(imagenes.get(producto.getId()));
             }
