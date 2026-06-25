@@ -3,10 +3,10 @@ package com.licoreria.BusinessLayer.catalogo;
 import com.licoreria.DBmanager.DBManager;
 import com.licoreria.DBmanager.TransactionContext;
 import com.licoreria.dao.catalogo.*;
-import com.licoreria.dominio.catalogo.Categoria;
-import com.licoreria.dominio.catalogo.Imagen;
-import com.licoreria.dominio.catalogo.Receta;
+import com.licoreria.dominio.catalogo.*;
+
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -14,22 +14,43 @@ public class RecetaBLImpl implements RecetaBL {
     private final RecetaDAO recetaDAO;
     private final ImagenDAO imagenDAO;
     private final CategoriaDAO categoriaDAO;
+    private final ProductoDAO productoDAO;
     public RecetaBLImpl() {
         this.recetaDAO = new RecetaDAOImpl();
         this.imagenDAO = new ImagenDAOImpl();
         this.categoriaDAO = new CategoriaDAOImpl();
+        this.productoDAO = new ProductoDAOImpl();
     }
 
     @Override
     public List<Receta> getAll() {
         try (Connection con = DBManager.getInstance().getConnection()) {
-            List<Receta> recetas =  recetaDAO.getAll(con);
-            List<Integer> recetasIds = recetas.stream().map(p->p.getId()).toList();
+            List<Receta> recetas = recetaDAO.getAll(con);
+            if (recetas == null || recetas.isEmpty()) {
+                return new ArrayList<>();
+            }
+            List<Integer> recetasIds = recetas.stream().map(Receta::getId).toList();
             Map<Integer, List<Imagen>> imagenes = imagenDAO.getAllByRecetas(con, recetasIds);
             Map<Integer, List<Categoria>> categorias = categoriaDAO.getAllByRecetas(con, recetasIds);
-            for (Receta receta: recetas){
-                receta.setCategorias(categorias.get(receta.getId()));
-                receta.setImagenes(imagenes.get(receta.getId()));
+            List<Integer> idsProductos = recetas.stream()
+                    .flatMap(r -> r.getElementos().stream()) // Extraemos los elementos de todas las recetas
+                    .filter(e -> e.getProducto() != null)
+                    .map(e -> e.getProducto().getId())
+                    .distinct()
+                    .toList();
+            Map<Integer, Producto> productosMap = idsProductos.isEmpty() ?
+                    new java.util.HashMap<>() :
+                    productoDAO.getMapByIds(con, idsProductos);
+
+            for (Receta receta : recetas) {
+                receta.setCategorias(categorias.getOrDefault(receta.getId(), new ArrayList<>()));
+                receta.setImagenes(imagenes.getOrDefault(receta.getId(), new ArrayList<>()));
+                for (ElementoReceta elemento : receta.getElementos()) {
+                    if (elemento.getProducto() != null) {
+                        Producto productoCompleto = productosMap.get(elemento.getProducto().getId());
+                        elemento.setProducto(productoCompleto);
+                    }
+                }
             }
             return recetas;
         } catch (Exception e) {
@@ -40,15 +61,39 @@ public class RecetaBLImpl implements RecetaBL {
     @Override
     public Receta get(int id) {
         try (Connection con = DBManager.getInstance().getConnection()) {
-            Receta receta =  recetaDAO.get(con, id);
+            // 1. Obtener la receta (ya trae sus elementos desde el DAO)
+            Receta receta = recetaDAO.get(con, id);
+
+            if (receta == null) return null;
+
+            // 2. Cargar sus categorías e imágenes
             receta.setCategorias(categoriaDAO.getAllByReceta(con, receta));
             receta.setImagenes(imagenDAO.getAllByReceta(con, receta));
+
+            // 3. Extraer IDs de los productos de esta receta en particular
+            List<Integer> idsProductos = receta.getElementos().stream()
+                    .filter(e -> e.getProducto() != null)
+                    .map(e -> e.getProducto().getId())
+                    .distinct()
+                    .toList();
+
+            // 4. Buscar los productos completos
+            Map<Integer, Producto> productosMap = idsProductos.isEmpty() ?
+                    new java.util.HashMap<>() :
+                    productoDAO.getMapByIds(con, idsProductos);
+
+            // 5. Reemplazar los productos en los elementos
+            for (ElementoReceta elemento : receta.getElementos()) {
+                if (elemento.getProducto() != null) {
+                    elemento.setProducto(productosMap.get(elemento.getProducto().getId()));
+                }
+            }
+
             return receta;
         } catch (Exception e) {
             throw new RuntimeException("Error al obtener receta", e);
         }
     }
-
     @Override
     public Receta save(Receta receta) {
         try {

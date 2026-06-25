@@ -4,7 +4,10 @@ import com.licoreria.dao.DAOUtils;
 import com.licoreria.dominio.catalogo.*;
 
 import java.sql.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ProductoDAOImpl implements ProductoDAO {
     @Override
@@ -192,5 +195,39 @@ public class ProductoDAOImpl implements ProductoDAO {
                 "WHERE dp.id_cliente_carrito = ?";
 
         return DAOUtils.getAll(sql, con, (ps) -> ps.setInt(1, idCliente), this::mapProduct);
+    }
+
+    @Override
+    public Map<Integer, Producto> getMapByIds(Connection con, List<Integer> idsProductos) throws SQLException {
+
+        Map<Integer, Producto> resultado = new HashMap<>();
+
+        if (idsProductos == null || idsProductos.isEmpty()) {
+            return resultado;
+        }
+
+        String placeholders = idsProductos.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(","));
+
+        String sql = "SELECT id_producto, nombre, descripcion, precio, precio_final, stock, descuento, volumen_litros, " +
+                "porcentaje_alcohol, id_impuesto, id_impuesto_alcohol, id_marca " +
+                "FROM Producto WHERE id_producto IN (" + placeholders + ")";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            int index = 1;
+            for (Integer id : idsProductos) {
+                ps.setInt(index++, id);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Producto producto = mapProduct(rs);
+                    resultado.put(producto.getId(), producto);
+                }
+            }
+        }
+
+        return resultado;
     }
 }

@@ -9,11 +9,13 @@ import com.licoreria.dominio.catalogo.Producto;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 public interface ProductoDAO extends BaseDAO<Producto, Integer> {
     void cargarImagen(Connection con, Producto producto, Imagen imagen) throws SQLException;
 
     void removerImagen(Connection con, Producto producto, Imagen imagen) throws SQLException;
+
     void removerImagen(Connection con, int idProducto, int idImagen) throws SQLException;
 
     void asignarImagenPrincipal(Connection con, Producto producto, Imagen imagen) throws SQLException;
@@ -23,4 +25,6 @@ public interface ProductoDAO extends BaseDAO<Producto, Integer> {
     void removerCategoria(Connection con, Producto producto, Categoria categoria) throws SQLException;
 
     List<Producto> getProductosPorCliente(Connection con, int idCliente) throws SQLException;
+
+    Map<Integer, Producto> getMapByIds(Connection con, List<Integer> idsProductos) throws SQLException;
 }

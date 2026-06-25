@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 public class RecetaDAOImpl implements RecetaDAO {
 
@@ -21,6 +22,7 @@ public class RecetaDAOImpl implements RecetaDAO {
         if (receta != null) {
             cargarElementos(con, receta);
         }
+
         return receta;
     }
 
@@ -31,9 +33,16 @@ public class RecetaDAOImpl implements RecetaDAO {
 
         List<Receta> recetas = DAOUtils.getAll(sql, con, this::mapearReceta);
 
-        for (Receta receta : recetas) {
-            cargarElementos(con, receta);
+        if (recetas == null || recetas.isEmpty()) {
+            return recetas;
         }
+
+        List<Integer> idsRecetas = recetas.stream().map(Receta::getId).toList();
+        Map<Integer, List<ElementoReceta>> mapaElementos = getAllElementosByRecetas(con, idsRecetas);
+        for (Receta receta : recetas) {
+            receta.setElementos(mapaElementos.getOrDefault(receta.getId(), new java.util.ArrayList<>()));
+        }
+
         return recetas;
     }
 
@@ -93,12 +102,54 @@ public class RecetaDAOImpl implements RecetaDAO {
                     ele.setId(rs.getInt("id_elemento_receta"));
                     ele.setCantidad(rs.getDouble("cantidad"));
                     int idProducto = rs.getInt("id_producto");
-                    Producto p = productoDAO.get(con, idProducto);
-                    ele.setProducto(p);
+                    Producto producto = new Producto();
+                    producto.setId(idProducto);
+                    ele.setProducto(producto);
                     return ele;
                 }
         );
         receta.setElementos(elementos);
+    }
+
+    private Map<Integer, List<ElementoReceta>> getAllElementosByRecetas(Connection con, List<Integer> idRecetas) throws SQLException {
+        Map<Integer, List<ElementoReceta>> resultado = new java.util.HashMap<>();
+
+        if (idRecetas == null || idRecetas.isEmpty()) {
+            return resultado;
+        }
+
+        String placeholders = idRecetas.stream()
+                .map(id -> "?")
+                .collect(java.util.stream.Collectors.joining(","));
+
+        // Seleccionamos id_receta para saber a quién pertenece cada elemento
+        String sql = "SELECT id_receta, id_elemento_receta, id_producto, cantidad " +
+                "FROM Elemento_Receta WHERE id_receta IN (" + placeholders + ")";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            int index = 1;
+            for (Integer id : idRecetas) {
+                ps.setInt(index++, id);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Integer idReceta = rs.getInt("id_receta");
+
+                    ElementoReceta ele = new ElementoReceta();
+                    ele.setId(rs.getInt("id_elemento_receta"));
+                    ele.setCantidad(rs.getDouble("cantidad"));
+
+                    Producto producto = new Producto();
+                    producto.setId(rs.getInt("id_producto"));
+                    ele.setProducto(producto);
+
+                    // Agrupamos el elemento en la lista correspondiente a su id_receta
+                    resultado.computeIfAbsent(idReceta, k -> new java.util.ArrayList<>()).add(ele);
+                }
+            }
+        }
+        return resultado;
     }
 
     private void guardarElementos(Connection con, Receta receta) throws SQLException {
@@ -147,7 +198,8 @@ public class RecetaDAOImpl implements RecetaDAO {
             ps.setInt(1, receta.getId());
             ps.setInt(2, imagen.getId());
             ps.setBoolean(3, false); // No es principal por defecto
-        }, (rs) -> {});
+        }, (rs) -> {
+        });
     }
 
     @Override
@@ -162,7 +214,8 @@ public class RecetaDAOImpl implements RecetaDAO {
         DAOUtils.save(sqlInsert, con, (ps) -> {
             ps.setInt(1, receta.getId());
             ps.setInt(2, imagen.getId());
-        }, (rs) -> {});
+        }, (rs) -> {
+        });
     }
 
     // En RecetaDAOImpl.java
@@ -190,17 +243,18 @@ public class RecetaDAOImpl implements RecetaDAO {
                 "FROM Receta r " +
                 "INNER JOIN Detalle_Receta dr ON r.id_receta = dr.id_receta " +
                 "WHERE dr.id_cliente_carrito = ?";
-
         List<Receta> recetas = DAOUtils.getAll(sql, con,
                 (ps) -> ps.setInt(1, idCliente),
                 this::mapearReceta
         );
-
-        // Cargamos los productos que conforman cada receta obtenida
-        for (Receta receta : recetas) {
-            cargarElementos(con, receta);
+        if (recetas == null || recetas.isEmpty()) {
+            return recetas;
         }
-
+        List<Integer> idsRecetas = recetas.stream().map(Receta::getId).toList();
+        Map<Integer, List<ElementoReceta>> mapaElementos = getAllElementosByRecetas(con, idsRecetas);
+        for (Receta receta : recetas) {
+            receta.setElementos(mapaElementos.getOrDefault(receta.getId(), new java.util.ArrayList<>()));
+        }
         return recetas;
     }
 
