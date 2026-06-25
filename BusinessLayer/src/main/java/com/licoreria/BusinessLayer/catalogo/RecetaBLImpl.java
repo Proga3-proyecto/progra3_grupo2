@@ -8,6 +8,7 @@ import com.licoreria.dominio.catalogo.Imagen;
 import com.licoreria.dominio.catalogo.Receta;
 import java.sql.Connection;
 import java.util.List;
+import java.util.Map;
 
 public class RecetaBLImpl implements RecetaBL {
     private final RecetaDAO recetaDAO;
@@ -23,11 +24,13 @@ public class RecetaBLImpl implements RecetaBL {
     public List<Receta> getAll() {
         try (Connection con = DBManager.getInstance().getConnection()) {
             List<Receta> recetas =  recetaDAO.getAll(con);
+            List<Integer> recetasIds = recetas.stream().map(p->p.getId()).toList();
+            Map<Integer, List<Imagen>> imagenes = imagenDAO.getAllByRecetas(con, recetasIds);
+            Map<Integer, List<Categoria>> categorias = categoriaDAO.getAllByRecetas(con, recetasIds);
             for (Receta receta: recetas){
-                receta.setCategorias(categoriaDAO.getAllByReceta(con, receta));
-                receta.setImagenes(imagenDAO.getAllByReceta(con, receta));
+                receta.setCategorias(categorias.get(receta.getId()));
+                receta.setImagenes(imagenes.get(receta.getId()));
             }
-
             return recetas;
         } catch (Exception e) {
             throw new RuntimeException("Error al obtener recetas", e);

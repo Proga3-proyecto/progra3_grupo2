@@ -11,18 +11,19 @@ import com.licoreria.dominio.catalogo.Producto;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 public class ProductoBLImpl implements ProductoBL {
 
     ProductoDAO productoDAO;
-    MarcaDAO daoMarca;
-    CategoriaDAO daoCategoria;
+    MarcaDAO marcaDAO;
+    CategoriaDAO categoriaDAO;
     ImagenDAO imagenDAO;
 
     public ProductoBLImpl() {
         productoDAO = new ProductoDAOImpl();
-        daoMarca = new MarcaDAOImpl();
-        daoCategoria = new CategoriaDAOImpl();
+        marcaDAO = new MarcaDAOImpl();
+        categoriaDAO = new CategoriaDAOImpl();
         imagenDAO = new ImagenDAOImpl();
     }
 
@@ -30,10 +31,15 @@ public class ProductoBLImpl implements ProductoBL {
     public List<Producto> getAll() {
         try (Connection con = DBManager.getInstance().getConnection()) {
             List<Producto> productos = productoDAO.getAll(con);
+            List<Integer> productosids = productos.stream().map(p -> p.getId()).toList();
+            Map<Integer, List<Imagen>> imagenes = imagenDAO.getAllByProducts(con, productosids);
+            List<Integer> marcasIds = productos.stream().map(p -> p.getMarca().getId()).toList();
+            Map<Integer, List<Categoria>> categorias = categoriaDAO.getAllByProductos(con, productosids);
+            Map<Integer, Marca> marcas = marcaDAO.getAllByProductos(con, marcasIds);
             for (Producto producto : productos) {
-                producto.setMarca(daoMarca.get(con, producto.getId()));
-                producto.setCategorias(daoCategoria.getAllByProducto(con, producto));
-                producto.setImagenes(imagenDAO.getAllByProduct(con, producto));
+                producto.setMarca(marcas.get(producto.getId()));
+                producto.setCategorias(categorias.get(producto.getId()));
+                producto.setImagenes(imagenes.get(producto.getId()));
             }
             return productos;
         } catch (SQLException e) {
@@ -46,8 +52,8 @@ public class ProductoBLImpl implements ProductoBL {
         try (Connection con = DBManager.getInstance().getConnection()) {
             Producto producto = productoDAO.get(con, id);
             if (producto == null) return null;
-            producto.setMarca(daoMarca.get(con, producto.getId()));
-            producto.setCategorias(daoCategoria.getAllByProducto(con, producto));
+            producto.setMarca(marcaDAO.get(con, producto.getId()));
+            producto.setCategorias(categoriaDAO.getAllByProducto(con, producto));
             producto.setImagenes(imagenDAO.getAllByProduct(con, producto));
             return producto;
         } catch (SQLException e) {
@@ -87,10 +93,10 @@ public class ProductoBLImpl implements ProductoBL {
                     String marcaNombre = producto.getMarca().getNombre();
                     Marca marca = null;
                     if (marcaNombre != null) {
-                        marca = daoMarca.get(con, marcaNombre);
+                        marca = marcaDAO.get(con, marcaNombre);
                     }
                     if (marca == null) {
-                        marca = daoMarca.save(con, producto.getMarca());
+                        marca = marcaDAO.save(con, producto.getMarca());
                     }
                     producto.setMarca(marca);
                 }
@@ -101,11 +107,11 @@ public class ProductoBLImpl implements ProductoBL {
                         Categoria cateDB = null;
 
                         if (categoriaNombre != null) {
-                            cateDB = daoCategoria.get(con, categoriaNombre);
+                            cateDB = categoriaDAO.get(con, categoriaNombre);
                         }
 
                         if (cateDB == null) {
-                            cateDB = daoCategoria.save(con, categoria);
+                            cateDB = categoriaDAO.save(con, categoria);
                         }
                         categoria.setId(cateDB.getId());
                         productoDAO.asignarCategoria(con, producto, cateDB);
@@ -210,7 +216,7 @@ public class ProductoBLImpl implements ProductoBL {
             Connection con = TransactionContext.getConnection();
 
             try {
-                Categoria categoria = daoCategoria.get(con, nombreCategoria);
+                Categoria categoria = categoriaDAO.get(con, nombreCategoria);
                 if (categoria == null)
                     throw new RuntimeException("No se encontro categoria");
                 productoDAO.removerCategoria(con, producto, categoria);
@@ -231,9 +237,9 @@ public class ProductoBLImpl implements ProductoBL {
         try {
             Connection con = TransactionContext.getConnection();
             try {
-                Categoria cat = daoCategoria.get(con, categoria.getNombre());
+                Categoria cat = categoriaDAO.get(con, categoria.getNombre());
                 if (cat == null)
-                    daoCategoria.save(con, categoria);
+                    categoriaDAO.save(con, categoria);
                 productoDAO.asignarCategoria(con, producto, categoria);
                 TransactionContext.commit();
             } catch (SQLException e) {
@@ -253,9 +259,9 @@ public class ProductoBLImpl implements ProductoBL {
             Connection con = TransactionContext.getConnection();
             try {
 
-                Marca m = daoMarca.get(con, marca.getNombre());
+                Marca m = marcaDAO.get(con, marca.getNombre());
                 if (m == null)
-                    daoMarca.save(con, marca);
+                    marcaDAO.save(con, marca);
                 else marca = m;
 
                 producto.setMarca(marca);

@@ -2,7 +2,7 @@ package com.licoreria.servicios.servicios.catologo;
 
 import com.licoreria.BusinessLayer.catalogo.RecetaBL;
 import com.licoreria.BusinessLayer.catalogo.RecetaBLImpl;
-import com.licoreria.DriveDriver.DriveDriver;
+import com.licoreria.SupabaseDriver.SupabaseDriver;
 import com.licoreria.dominio.catalogo.Categoria;
 import com.licoreria.dominio.catalogo.Receta;
 import jakarta.ws.rs.*;
@@ -19,9 +19,11 @@ import java.io.InputStream;
 public class RecetasRS {
 
     private final RecetaBL recetaBL;
+    private final SupabaseDriver supabaseDriver;
 
     public RecetasRS() {
         this.recetaBL = new RecetaBLImpl();
+        this.supabaseDriver = new SupabaseDriver();
     }
 
     @GET
@@ -90,7 +92,7 @@ public class RecetasRS {
         if (receta == null) return Response.status(404).entity("Receta no encontrada").build();
 
         try {
-            String url = DriveDriver.uploadInputStream(archivo, detalle.getFileName(), "image/png", "TU_ID_CARPETA_DRIVE");
+            String url = this.supabaseDriver.upload(detalle.getFileName(), archivo);
             recetaBL.agregarImagen(receta, url);
             return Response.ok("Imagen subida correctamente").build();
         } catch (Exception e) {
