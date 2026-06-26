@@ -9,7 +9,6 @@ import com.licoreria.dominio.catalogo.Categoria;
 import com.licoreria.dominio.catalogo.Marca;
 import com.licoreria.dominio.catalogo.Producto;
 
-import com.licoreria.dto.ProductoDTO;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -28,7 +27,7 @@ public class ProductosRS {
 
     private final ProductoBL productoBO;
     private final SupabaseDriver supabaseDriver;
-
+    
     public ProductosRS() {
         this.productoBO = new ProductoBLImpl();
         this.supabaseDriver = new SupabaseDriver();
@@ -37,15 +36,8 @@ public class ProductosRS {
     @GET
     public Response listarTodos() {
         try {
-            long ini = System.currentTimeMillis();
             List<Producto> productos = productoBO.getAll();
-            long fin = System.currentTimeMillis();
-
-            List<ProductoDTO> productosDTO = productos.stream()
-                    .map((p) -> new ProductoDTO(p))
-                    .toList();
-
-            return Response.ok(productosDTO).build();
+            return Response.ok(productos).build();
         } catch (Exception ex) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"error\":\"" + ex.getMessage() + "\"}").build();
         }

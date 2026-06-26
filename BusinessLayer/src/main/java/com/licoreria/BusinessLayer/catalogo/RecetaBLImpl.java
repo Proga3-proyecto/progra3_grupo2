@@ -15,11 +15,13 @@ public class RecetaBLImpl implements RecetaBL {
     private final ImagenDAO imagenDAO;
     private final CategoriaDAO categoriaDAO;
     private final ProductoDAO productoDAO;
+    private final MarcaDAO marcaDAO;
     public RecetaBLImpl() {
         this.recetaDAO = new RecetaDAOImpl();
         this.imagenDAO = new ImagenDAOImpl();
         this.categoriaDAO = new CategoriaDAOImpl();
         this.productoDAO = new ProductoDAOImpl();
+        this.marcaDAO = new MarcaDAOImpl();
     }
 
     @Override
@@ -42,6 +44,25 @@ public class RecetaBLImpl implements RecetaBL {
                     new java.util.HashMap<>() :
                     productoDAO.getMapByIds(con, idsProductos);
 
+            if (!idsProductos.isEmpty()) {
+                Map<Integer, List<Imagen>> imagenesProductos = imagenDAO.getAllByProducts(con, idsProductos);
+                List<Integer> marcasIds = productosMap.values().stream()
+                        .filter(p -> p.getMarca() != null)
+                        .map(p -> p.getMarca().getId())
+                        .distinct()
+                        .toList();
+                Map<Integer, Marca> marcasProductos = marcasIds.isEmpty() ? 
+                        new java.util.HashMap<>() : 
+                        marcaDAO.getAllByProductos(con, marcasIds);
+
+                for (Producto p : productosMap.values()) {
+                    if (p.getMarca() != null && marcasProductos.containsKey(p.getMarca().getId())) {
+                        p.setMarca(marcasProductos.get(p.getMarca().getId()));
+                    }
+                    p.setImagenes(imagenesProductos.getOrDefault(p.getId(), new ArrayList<>()));
+                }
+            }
+
             for (Receta receta : recetas) {
                 receta.setCategorias(categorias.getOrDefault(receta.getId(), new ArrayList<>()));
                 receta.setImagenes(imagenes.getOrDefault(receta.getId(), new ArrayList<>()));
@@ -61,28 +82,42 @@ public class RecetaBLImpl implements RecetaBL {
     @Override
     public Receta get(int id) {
         try (Connection con = DBManager.getInstance().getConnection()) {
-            // 1. Obtener la receta (ya trae sus elementos desde el DAO)
             Receta receta = recetaDAO.get(con, id);
 
             if (receta == null) return null;
 
-            // 2. Cargar sus categorías e imágenes
             receta.setCategorias(categoriaDAO.getAllByReceta(con, receta));
             receta.setImagenes(imagenDAO.getAllByReceta(con, receta));
 
-            // 3. Extraer IDs de los productos de esta receta en particular
             List<Integer> idsProductos = receta.getElementos().stream()
                     .filter(e -> e.getProducto() != null)
                     .map(e -> e.getProducto().getId())
                     .distinct()
                     .toList();
 
-            // 4. Buscar los productos completos
             Map<Integer, Producto> productosMap = idsProductos.isEmpty() ?
                     new java.util.HashMap<>() :
                     productoDAO.getMapByIds(con, idsProductos);
 
-            // 5. Reemplazar los productos en los elementos
+            if (!idsProductos.isEmpty()) {
+                Map<Integer, List<Imagen>> imagenesProductos = imagenDAO.getAllByProducts(con, idsProductos);
+                List<Integer> marcasIds = productosMap.values().stream()
+                        .filter(p -> p.getMarca() != null)
+                        .map(p -> p.getMarca().getId())
+                        .distinct()
+                        .toList();
+                Map<Integer, Marca> marcasProductos = marcasIds.isEmpty() ? 
+                        new java.util.HashMap<>() : 
+                        marcaDAO.getAllByProductos(con, marcasIds);
+
+                for (Producto p : productosMap.values()) {
+                    if (p.getMarca() != null && marcasProductos.containsKey(p.getMarca().getId())) {
+                        p.setMarca(marcasProductos.get(p.getMarca().getId()));
+                    }
+                    p.setImagenes(imagenesProductos.getOrDefault(p.getId(), new ArrayList<>()));
+                }
+            }
+
             for (ElementoReceta elemento : receta.getElementos()) {
                 if (elemento.getProducto() != null) {
                     elemento.setProducto(productosMap.get(elemento.getProducto().getId()));
