@@ -72,12 +72,32 @@ public class ProductoBLImpl implements ProductoBL {
 
     @Override
     public void delete(int id) {
-        try (Connection con = DBManager.getInstance().getConnection()) {
-            Producto producto = this.get(id);
-            if (producto == null) {
-                throw new RuntimeException("No se encontroProducto");
+        try {
+            Connection con = TransactionContext.getConnection();
+            try {
+                Producto producto = productoDAO.get(con, id);
+                if (producto == null) {
+                    throw new RuntimeException("No se encontroProducto");
+                }
+                
+                List<Imagen> imagenes = imagenDAO.getAllByProduct(con, producto);
+                if (imagenes != null) {
+                    for (Imagen img : imagenes) productoDAO.removerImagen(con, producto, img);
+                }
+                
+                List<Categoria> categorias = categoriaDAO.getAllByProducto(con, producto);
+                if (categorias != null) {
+                    for (Categoria cat : categorias) productoDAO.removerCategoria(con, producto, cat);
+                }
+                
+                productoDAO.remove(con, producto);
+                TransactionContext.commit();
+            } catch (SQLException e) {
+                TransactionContext.rollback();
+                throw new RuntimeException(e);
+            } finally {
+                TransactionContext.close();
             }
-            productoDAO.remove(con, producto);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -133,8 +153,36 @@ public class ProductoBLImpl implements ProductoBL {
 
     @Override
     public Producto update(Producto producto) {
-        try (Connection con = DBManager.getInstance().getConnection()) {
-            return productoDAO.update(con, producto);
+        try {
+            Connection con = TransactionContext.getConnection();
+            try {
+                Producto existing = productoDAO.get(con, producto.getId());
+                if (existing == null) throw new RuntimeException("Producto no encontrado");
+
+                if (producto.getImpuestoBase() == null) producto.setImpuestoBase(existing.getImpuestoBase());
+                if (producto.getImpuestoAlcohol() == null) producto.setImpuestoAlcohol(existing.getImpuestoAlcohol());
+
+                if (producto.getMarca() != null) {
+                    String marcaNombre = producto.getMarca().getNombre();
+                    Marca marca = null;
+                    if (marcaNombre != null) {
+                        marca = marcaDAO.get(con, marcaNombre);
+                    }
+                    if (marca == null) {
+                        marca = marcaDAO.save(con, producto.getMarca());
+                    }
+                    producto.setMarca(marca);
+                }
+                
+                productoDAO.update(con, producto);
+                TransactionContext.commit();
+                return producto;
+            } catch (SQLException e) {
+                TransactionContext.rollback();
+                throw new RuntimeException(e);
+            } finally {
+                TransactionContext.close();
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
