@@ -6,6 +6,7 @@ import com.licoreria.dominio.usuarios.Admin;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import com.licoreria.dto.CambiarPasswordRequest;
 
 @Path("/administradores")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -17,6 +18,9 @@ public class AdminsRS {
     public AdminsRS() {
         this.adminBL = new AdminBLImpl();
     }
+
+
+
 
     @GET
     public Response listarTodos() {
@@ -56,6 +60,28 @@ public class AdminsRS {
         try {
             adminBL.delete(id);
             return Response.noContent().build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\":\"" + e.getMessage() + "\"}").build();
+        }
+    }
+
+    @PUT
+    @Path("/{id}/password")
+    public Response cambiarPassword(@PathParam("id") int id, CambiarPasswordRequest request) {
+        try {
+            Admin admin = adminBL.get(id);
+            if (admin == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"error\":\"Administrador no encontrado\"}").build();
+            }
+            if (request.getNewPassword() == null || request.getNewPassword().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\":\"La nueva contraseña es requerida\"}").build();
+            }
+            admin.setContrasenaHash(request.getNewPassword());
+            adminBL.update(admin);
+            return Response.ok("{\"mensaje\":\"Contraseña actualizada correctamente\"}").build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("{\"error\":\"" + e.getMessage() + "\"}").build();

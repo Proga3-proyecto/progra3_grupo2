@@ -16,7 +16,7 @@ public class ClienteDAOImpl implements ClienteDAO {
     @Override
     public Cliente get(Connection con, Integer id) throws SQLException {
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo " +
+                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo, u.created_at " +
                 "FROM Cliente c " +
                 "INNER JOIN Usuario u ON c.id_usuario = u.id_usuario " +
                 "WHERE c.id_usuario = ?";
@@ -33,7 +33,7 @@ public class ClienteDAOImpl implements ClienteDAO {
     @Override
     public List<Cliente> getAll(Connection con) throws SQLException {
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo " +
+                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo, u.created_at " +
                 "FROM Cliente c " +
                 "INNER JOIN Usuario u ON c.id_usuario = u.id_usuario";
 
@@ -136,7 +136,7 @@ public class ClienteDAOImpl implements ClienteDAO {
                 (rs) -> {
                     ClienteDireccion dir = new ClienteDireccion();
                     dir.setId(rs.getInt("id_direccion"));
-                    dir.setCliente(cliente);
+                   // dir.setCliente(cliente);
                     dir.setDireccion(rs.getString("direccion"));
                     return dir;
                 }
@@ -174,7 +174,7 @@ public class ClienteDAOImpl implements ClienteDAO {
         cliente.setEstado(EstadoUsuario.valueOf(rs.getString("estado")));
         cliente.setTelefono(rs.getString("telefono"));
         cliente.setFechaNacimiento(rs.getDate("fecha_nacimiento"));
-
+        cliente.setCreatedAt(rs.getDate("created_at"));
         int idPedidoActivo = rs.getInt("id_pedido_activo");
         if (!rs.wasNull()) {
             Pedido pedido = new Pedido();
@@ -187,7 +187,7 @@ public class ClienteDAOImpl implements ClienteDAO {
     @Override
     public Cliente getPorCorreo(Connection con, String correo, String contrasena) throws SQLException {
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo " +
+                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo, u.created_at " +
                 "FROM Cliente c " +
                 "INNER JOIN Usuario u ON c.id_usuario = u.id_usuario " +
                 "WHERE u.correo = ? AND u.contrasena_hash = ?";
@@ -199,6 +199,133 @@ public class ClienteDAOImpl implements ClienteDAO {
         }
 
         return cliente;
+    }
+
+    @Override
+    public void agregarProductoAlCarrito(Connection con, int idCliente, int idProducto, int cantidad, double descuentoTotal, double montoTotal) throws SQLException {
+        // Verificar si el producto ya está en el carrito
+        final String sqlCheck = "SELECT cantidad, descuento_total, monto_total FROM Detalle_Producto WHERE id_cliente_carrito = ? AND id_producto = ?";
+        boolean exists = false;
+        int currentCantidad = 0;
+        double currentDescuento = 0;
+        double currentMonto = 0;
+        
+        try (java.sql.PreparedStatement psCheck = con.prepareStatement(sqlCheck)) {
+            psCheck.setInt(1, idCliente);
+            psCheck.setInt(2, idProducto);
+            try (java.sql.ResultSet rs = psCheck.executeQuery()) {
+                if (rs.next()) {
+                    exists = true;
+                    currentCantidad = rs.getInt("cantidad");
+                    currentDescuento = rs.getDouble("descuento_total");
+                    currentMonto = rs.getDouble("monto_total");
+                }
+            }
+        }
+
+        if (exists) {
+            final String sqlUpdate = "UPDATE Detalle_Producto SET cantidad = ?, descuento_total = ?, monto_total = ? WHERE id_cliente_carrito = ? AND id_producto = ?";
+            DAOUtils.update(sqlUpdate, con, (ps) -> {
+                ps.setInt(1, currentCantidad + cantidad);
+                ps.setDouble(2, currentDescuento + descuentoTotal);
+                ps.setDouble(3, currentMonto + montoTotal);
+                ps.setInt(4, idCliente);
+                ps.setInt(5, idProducto);
+            });
+        } else {
+            final String sqlInsert = "INSERT INTO Detalle_Producto (id_cliente_carrito, id_producto, cantidad, descuento_total, monto_total) VALUES (?, ?, ?, ?, ?)";
+            DAOUtils.update(sqlInsert, con, (ps) -> {
+                ps.setInt(1, idCliente);
+                ps.setInt(2, idProducto);
+                ps.setInt(3, cantidad);
+                ps.setDouble(4, descuentoTotal);
+                ps.setDouble(5, montoTotal);
+            });
+        }
+    }
+
+    @Override
+    public void agregarRecetaAlCarrito(Connection con, int idCliente, int idReceta, int cantidad, double descuentoTotal, double montoTotal) throws SQLException {
+        final String sqlCheck = "SELECT cantidad, descuento_total, monto_total FROM Detalle_Receta WHERE id_cliente_carrito = ? AND id_receta = ?";
+        boolean exists = false;
+        int currentCantidad = 0;
+        double currentDescuento = 0;
+        double currentMonto = 0;
+        
+        try (java.sql.PreparedStatement psCheck = con.prepareStatement(sqlCheck)) {
+            psCheck.setInt(1, idCliente);
+            psCheck.setInt(2, idReceta);
+            try (java.sql.ResultSet rs = psCheck.executeQuery()) {
+                if (rs.next()) {
+                    exists = true;
+                    currentCantidad = rs.getInt("cantidad");
+                    currentDescuento = rs.getDouble("descuento_total");
+                    currentMonto = rs.getDouble("monto_total");
+                }
+            }
+        }
+
+        if (exists) {
+            final String sqlUpdate = "UPDATE Detalle_Receta SET cantidad = ?, descuento_total = ?, monto_total = ? WHERE id_cliente_carrito = ? AND id_receta = ?";
+            DAOUtils.update(sqlUpdate, con, (ps) -> {
+                ps.setInt(1, currentCantidad + cantidad);
+                ps.setDouble(2, currentDescuento + descuentoTotal);
+                ps.setDouble(3, currentMonto + montoTotal);
+                ps.setInt(4, idCliente);
+                ps.setInt(5, idReceta);
+            });
+        } else {
+            final String sqlInsert = "INSERT INTO Detalle_Receta (id_cliente_carrito, id_receta, cantidad, descuento_total, monto_total) VALUES (?, ?, ?, ?, ?)";
+            DAOUtils.update(sqlInsert, con, (ps) -> {
+                ps.setInt(1, idCliente);
+                ps.setInt(2, idReceta);
+                ps.setInt(3, cantidad);
+                ps.setDouble(4, descuentoTotal);
+                ps.setDouble(5, montoTotal);
+            });
+        }
+    }
+
+    @Override
+    public void eliminarProductoDelCarrito(Connection con, int idCliente, int idProducto) throws SQLException {
+        final String sql = "DELETE FROM Detalle_Producto WHERE id_cliente_carrito = ? AND id_producto = ?";
+        DAOUtils.delete(sql, con, (ps) -> {
+            ps.setInt(1, idCliente);
+            ps.setInt(2, idProducto);
+        });
+    }
+
+    @Override
+    public void eliminarRecetaDelCarrito(Connection con, int idCliente, int idReceta) throws SQLException {
+        final String sql = "DELETE FROM Detalle_Receta WHERE id_cliente_carrito = ? AND id_receta = ?";
+        DAOUtils.delete(sql, con, (ps) -> {
+            ps.setInt(1, idCliente);
+            ps.setInt(2, idReceta);
+        });
+    }
+
+    @Override
+    public void actualizarCantidadProductoEnCarrito(Connection con, int idCliente, int idProducto, int cantidad, double descuentoTotal, double montoTotal) throws SQLException {
+        final String sql = "UPDATE Detalle_Producto SET cantidad = ?, descuento_total = ?, monto_total = ? WHERE id_cliente_carrito = ? AND id_producto = ?";
+        DAOUtils.update(sql, con, (ps) -> {
+            ps.setInt(1, cantidad);
+            ps.setDouble(2, descuentoTotal);
+            ps.setDouble(3, montoTotal);
+            ps.setInt(4, idCliente);
+            ps.setInt(5, idProducto);
+        });
+    }
+
+    @Override
+    public void actualizarCantidadRecetaEnCarrito(Connection con, int idCliente, int idReceta, int cantidad, double descuentoTotal, double montoTotal) throws SQLException {
+        final String sql = "UPDATE Detalle_Receta SET cantidad = ?, descuento_total = ?, monto_total = ? WHERE id_cliente_carrito = ? AND id_receta = ?";
+        DAOUtils.update(sql, con, (ps) -> {
+            ps.setInt(1, cantidad);
+            ps.setDouble(2, descuentoTotal);
+            ps.setDouble(3, montoTotal);
+            ps.setInt(4, idCliente);
+            ps.setInt(5, idReceta);
+        });
     }
 
 }

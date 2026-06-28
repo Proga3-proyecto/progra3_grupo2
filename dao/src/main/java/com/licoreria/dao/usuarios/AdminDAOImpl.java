@@ -13,7 +13,7 @@ public class AdminDAOImpl implements AdminDAO {
     @Override
     public Admin get(Connection con, Integer id) throws SQLException {
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "a.fecha_inicio_admin, a.is_master" +
+                "a.fecha_inicio_admin, a.is_master, u.created_at" +
                 "FROM Admin a " +
                 "INNER JOIN Usuario u ON a.id_usuario = u.id_usuario " +
                 "WHERE a.id_usuario = ?";
@@ -24,7 +24,7 @@ public class AdminDAOImpl implements AdminDAO {
     @Override
     public List<Admin> getAll(Connection con) throws SQLException {
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "a.fecha_inicio_admin, a.is_master " +
+                "a.fecha_inicio_admin, a.is_master, u.created_at " +
                 "FROM Admin a " +
                 "INNER JOIN Usuario u ON a.id_usuario = u.id_usuario";
 
@@ -101,13 +101,14 @@ public class AdminDAOImpl implements AdminDAO {
         admin.setEstado(EstadoUsuario.valueOf(rs.getString("estado")));
         admin.setFechaInicioAdmin(rs.getDate("fecha_inicio_admin"));
         admin.setMaster(rs.getBoolean("is_master"));
+        admin.setCreatedAt(rs.getDate("created_at"));
         return admin;
     }
 
     @Override
     public Admin getPorCorreo(Connection con, String correo, String contrasena) throws SQLException {
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "a.fecha_inicio_admin,  a.is_master " +
+                "a.fecha_inicio_admin,  a.is_master , u.created_at " +
                 "FROM Admin a " +
                 "INNER JOIN Usuario u ON a.id_usuario = u.id_usuario " +
                 "WHERE u.correo = ? AND u.contrasena_hash = ?";

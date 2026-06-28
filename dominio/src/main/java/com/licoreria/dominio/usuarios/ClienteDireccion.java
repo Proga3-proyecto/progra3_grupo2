@@ -2,7 +2,6 @@ package com.licoreria.dominio.usuarios;
 
 public class ClienteDireccion {
     private Integer id;
-    private Cliente cliente;
     private String direccion;
 
     public ClienteDireccion() {
@@ -16,13 +15,13 @@ public class ClienteDireccion {
         this.id = id;
     }
 
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
+//    public Cliente getCliente() {
+//        return cliente;
+//    }
+//
+//    public void setCliente(Cliente cliente) {
+//        this.cliente = cliente;
+//    }
 
     public String getDireccion() {
         return direccion;

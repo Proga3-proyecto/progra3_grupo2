@@ -20,5 +20,12 @@ public interface ClienteBL {
     List<Producto> getProductosEnCarrito(int idCliente);
     List<Receta> getRecetasEnCarrito(int idCliente);
     Cliente validarCredenciales(String usuario, String password);
+    List<com.licoreria.dominio.carrito.Pedido> getPedidos(int idCliente);
+    void agregarProductoAlCarrito(int idCliente, int idProducto, int cantidad);
+    void agregarRecetaAlCarrito(int idCliente, int idReceta, int cantidad);
+    void eliminarProductoDelCarrito(int idCliente, int idProducto);
+    void eliminarRecetaDelCarrito(int idCliente, int idReceta);
+    void actualizarCantidadProductoEnCarrito(int idCliente, int idProducto, int cantidad);
+    void actualizarCantidadRecetaEnCarrito(int idCliente, int idReceta, int cantidad);
 
 }

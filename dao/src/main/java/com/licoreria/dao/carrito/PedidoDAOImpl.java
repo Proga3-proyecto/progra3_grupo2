@@ -48,6 +48,21 @@ public class PedidoDAOImpl implements PedidoDAO {
     }
 
     @Override
+    public List<Pedido> getPedidosPorCliente(Connection con, Integer idCliente) throws SQLException {
+        final String sql = "SELECT id_pedido, id_cliente, fecha_pedido, hora_inicio, hora_fin, " +
+                "precio_total, total_impuestos, precio_delivery, " +
+                "(precio_total + total_impuestos + precio_delivery) AS precio_final, estado, direccion_destino " +
+                "FROM Pedido WHERE id_cliente = ?";
+
+        List<Pedido> pedidos = DAOUtils.getAll(sql, con, (ps) -> ps.setInt(1, idCliente), this::mapPedido);
+
+        for (Pedido pedido : pedidos) {
+            loadDetails(con, pedido);
+        }
+        return pedidos;
+    }
+
+    @Override
     public Pedido save(Connection con, Pedido pedido) throws SQLException {
         final String sql = "INSERT INTO Pedido (id_cliente, fecha_pedido, hora_inicio, hora_fin, precio_total, " +
                 "total_impuestos, precio_delivery, estado, direccion_destino) " +

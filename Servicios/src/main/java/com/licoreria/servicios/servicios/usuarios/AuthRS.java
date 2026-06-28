@@ -68,7 +68,7 @@ public class AuthRS {
 
         } catch (Exception e) {
             LoginResponse exceptionResponse = new LoginResponse(false, "Error interno en el servidor: " + e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(exceptionResponse).build();
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(exceptionResponse).build();
         }
     }
 }
