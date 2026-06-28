@@ -325,15 +325,12 @@ public class ClienteDAOImpl implements ClienteDAO {
             double finalCurrentDescuento = currentDescuento;
             double finalCurrentMonto = currentMonto;
             DAOUtils.update(sqlUpdate, con, (ps) -> {
-<<<<<<< HEAD
                 ps.setInt(1, finalCurrentCantidad + cantidad);
                 ps.setDouble(2, finalCurrentDescuento + descuentoTotal);
                 ps.setDouble(3, finalCurrentMonto + montoTotal);
-=======
                 ps.setInt(1, finalCantidad + cantidad);
                 ps.setDouble(2, finalDescuento + descuentoTotal);
                 ps.setDouble(3, finalMonto + montoTotal);
->>>>>>> ed6ff7c7dbd0ee4df0a0ae00392542ff694c4f3d
                 ps.setInt(4, idCliente);
                 ps.setInt(5, idReceta);
             });
