@@ -233,6 +233,9 @@ public class ClienteDAOImpl implements ClienteDAO {
         }
 
         if (exists) {
+            final int finalCantidad = currentCantidad;
+            final double finalDescuento = currentDescuento;
+            final double finalMonto = currentMonto;
             final String sqlUpdate = "UPDATE Detalle_Producto SET cantidad = ?, descuento_total = ?, monto_total = ? WHERE id_cliente_carrito = ? AND id_producto = ?";
             int finalCurrentCantidad = currentCantidad;
             double finalCurrentDescuento = currentDescuento;
@@ -314,14 +317,23 @@ public class ClienteDAOImpl implements ClienteDAO {
         }
 
         if (exists) {
+            final int finalCantidad = currentCantidad;
+            final double finalDescuento = currentDescuento;
+            final double finalMonto = currentMonto;
             final String sqlUpdate = "UPDATE Detalle_Receta SET cantidad = ?, descuento_total = ?, monto_total = ? WHERE id_cliente_carrito = ? AND id_receta = ?";
             int finalCurrentCantidad = currentCantidad;
             double finalCurrentDescuento = currentDescuento;
             double finalCurrentMonto = currentMonto;
             DAOUtils.update(sqlUpdate, con, (ps) -> {
+<<<<<<< HEAD
                 ps.setInt(1, finalCurrentCantidad + cantidad);
                 ps.setDouble(2, finalCurrentDescuento + descuentoTotal);
                 ps.setDouble(3, finalCurrentMonto + montoTotal);
+=======
+                ps.setInt(1, finalCantidad + cantidad);
+                ps.setDouble(2, finalDescuento + descuentoTotal);
+                ps.setDouble(3, finalMonto + montoTotal);
+>>>>>>> ed6ff7c7dbd0ee4df0a0ae00392542ff694c4f3d
                 ps.setInt(4, idCliente);
                 ps.setInt(5, idReceta);
             });
