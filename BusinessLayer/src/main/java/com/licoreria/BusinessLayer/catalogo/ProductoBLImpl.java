@@ -300,7 +300,6 @@ public class ProductoBLImpl implements ProductoBL {
             throw new RuntimeException(e);
         }
     }
-
     @Override
     public void actualizarMarca(Producto producto, Marca marca) {
         try {
