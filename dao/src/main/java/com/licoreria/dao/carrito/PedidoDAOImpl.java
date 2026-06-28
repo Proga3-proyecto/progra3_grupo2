@@ -110,7 +110,7 @@ public class PedidoDAOImpl implements PedidoDAO {
                 (rs) -> {
                     PedidoDetalleProducto dp = new PedidoDetalleProducto();
                     dp.setId(rs.getInt("id_pedido_detalle_prod"));
-                    dp.setPedido(pedido);
+                    // No seteamos el pedido para evitar recursion infinita en el JSON
 
                     ProductoSnapshot snapshot = new ProductoSnapshot();
                     snapshot.setId(rs.getInt("id_producto_snapshot"));
@@ -130,7 +130,7 @@ public class PedidoDAOImpl implements PedidoDAO {
                 (rs) -> {
                     PedidoDetalleReceta dr = new PedidoDetalleReceta();
                     dr.setId(rs.getInt("id_pedido_detalle_receta"));
-                    dr.setPedido(pedido);
+                    // No seteamos el pedido para evitar recursion infinita en el JSON
 
                     RecetaSnapshot snapshot = new RecetaSnapshot();
                     snapshot.setId(rs.getInt("id_receta_snapshot"));
@@ -145,14 +145,19 @@ public class PedidoDAOImpl implements PedidoDAO {
     }
 
     private void saveDetails(Connection con, Pedido pedido) throws SQLException {
-        final String sqlProd = "INSERT INTO Pedido_Detalle_Producto (id_pedido, id_producto_snapshot, amount, cantidad) VALUES (?, ?, ?, ?)";
+        ProductoSnapshotDAO productoSnapshotDAO = new ProductoSnapshotDAOImpl();
+        RecetaSnapshotDAO recetaSnapshotDAO = new RecetaSnapshotDAOImpl();
+
+        final String sqlProd = "INSERT INTO Pedido_Detalle_Producto (id_pedido, id_producto_snapshot, cantidad) VALUES (?, ?, ?)";
         if (pedido.getDetallesProductos() != null) {
             for (PedidoDetalleProducto dp : pedido.getDetallesProductos()) {
+                if (dp.getProductoSnapshot() != null && (dp.getProductoSnapshot().getId() == null || dp.getProductoSnapshot().getId() == 0)) {
+                    productoSnapshotDAO.save(con, dp.getProductoSnapshot());
+                }
                 DAOUtils.save(sqlProd, con, (ps) -> {
                     ps.setInt(1, pedido.getId());
                     ps.setInt(2, dp.getProductoSnapshot().getId());
-                    ps.setInt(3, dp.getCantidad()); // amount mandatory en la BD
-                    ps.setInt(4, dp.getCantidad()); // cantidad
+                    ps.setInt(3, dp.getCantidad());
                 }, (rs) -> dp.setId(rs.getInt(1)));
             }
         }
@@ -160,6 +165,9 @@ public class PedidoDAOImpl implements PedidoDAO {
         final String sqlRec = "INSERT INTO Pedido_Detalle_Receta (id_pedido, id_receta_snapshot, cantidad, descuento_historico) VALUES (?, ?, ?, ?)";
         if (pedido.getDetallesRecetas() != null) {
             for (PedidoDetalleReceta dr : pedido.getDetallesRecetas()) {
+                if (dr.getRecetaSnapshot() != null && (dr.getRecetaSnapshot().getId() == null || dr.getRecetaSnapshot().getId() == 0)) {
+                    recetaSnapshotDAO.save(con, dr.getRecetaSnapshot());
+                }
                 DAOUtils.save(sqlRec, con, (ps) -> {
                     ps.setInt(1, pedido.getId());
                     ps.setInt(2, dr.getRecetaSnapshot().getId());

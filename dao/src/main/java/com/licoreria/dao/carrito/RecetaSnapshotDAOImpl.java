@@ -152,9 +152,14 @@ public class RecetaSnapshotDAOImpl implements RecetaSnapshotDAO {
     private void guardarElementos(Connection con, RecetaSnapshot snapshot) throws SQLException {
         if (snapshot.getElementosHistoricos() == null || snapshot.getElementosHistoricos().isEmpty()) return;
 
+        ProductoSnapshotDAO productoSnapshotDAO = new ProductoSnapshotDAOImpl();
         final String sql = "INSERT INTO Receta_Snapshot_Elemento (id_receta_snapshot, id_producto_snapshot, cantidad) VALUES (?, ?, ?)";
 
         for (RecetaSnapshotElemento elemento : snapshot.getElementosHistoricos()) {
+            if (elemento.getProductoSnapshot() != null && (elemento.getProductoSnapshot().getId() == null || elemento.getProductoSnapshot().getId() == 0)) {
+                productoSnapshotDAO.save(con, elemento.getProductoSnapshot());
+            }
+
             DAOUtils.save(sql, con, (ps) -> {
                 ps.setInt(1, snapshot.getId());
                 ps.setInt(2, elemento.getProductoSnapshot().getId());
