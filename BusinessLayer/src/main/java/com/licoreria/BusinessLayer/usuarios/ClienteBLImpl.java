@@ -352,4 +352,22 @@ public class ClienteBLImpl implements ClienteBL {
             throw new RuntimeException("Error al actualizar cantidad de la receta: " + e.getMessage(), e);
         }
     }
+
+    @Override
+    public void limpiarCarrito(int idCliente) {
+        try {
+            Connection con = TransactionContext.getConnection();
+            try {
+                this.clienteDAO.limpiarPedido(con, idCliente);
+                TransactionContext.commit();
+            } catch (Exception e) {
+                TransactionContext.rollback();
+                throw e;
+            } finally {
+                TransactionContext.close();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al actualizar cantidad de la receta: " + e.getMessage(), e);
+        }
+    }
 }

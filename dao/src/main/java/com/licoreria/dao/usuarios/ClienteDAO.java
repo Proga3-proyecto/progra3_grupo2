@@ -28,5 +28,8 @@ public interface ClienteDAO extends BaseDAO<Cliente, Integer> {
     void actualizarCantidadProductoEnCarrito(Connection con, int idCliente, int idProducto, int cantidad, double descuentoTotal, double montoTotal) throws SQLException;
 
     void actualizarCantidadRecetaEnCarrito(Connection con, int idCliente, int idReceta, int cantidad, double descuentoTotal, double montoTotal) throws SQLException;
-    Map<Integer, Cliente> getByIds(Connection con, List<Integer> ids)throws SQLException;
+
+    Map<Integer, Cliente> getByIds(Connection con, List<Integer> ids) throws SQLException;
+
+    void limpiarPedido(Connection con, int idCliente) throws SQLException;
 }

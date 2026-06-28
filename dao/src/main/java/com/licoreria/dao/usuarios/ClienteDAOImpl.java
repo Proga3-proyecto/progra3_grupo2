@@ -213,7 +213,7 @@ public class ClienteDAOImpl implements ClienteDAO {
     }
 
     @Override
-    public Map<Integer, Cliente> getByIds(Connection con, List<Integer> ids)throws SQLException{
+    public Map<Integer, Cliente> getByIds(Connection con, List<Integer> ids) throws SQLException {
         Map<Integer, Cliente> resultado = new HashMap<>();
         if (ids == null || ids.isEmpty()) {
             return resultado;
@@ -360,6 +360,18 @@ public class ClienteDAOImpl implements ClienteDAO {
             detalle.setMontoTotal(rs.getInt("monto_total"));
             detalle.setDescuentoTotal(rs.getDouble("descuento_total"));
             return detalle;
+        });
+    }
+
+    @Override
+    public void limpiarPedido(Connection con, int idCliente) throws SQLException {
+        final String sql = "DELETE FROM Detalle_Producto WHERE id_cliente_carrito = ?";
+        final String sql1 = "DELETE FROM Detalle_Receta WHERE id_cliente_carrito = ?";
+        DAOUtils.delete(sql, con, (ps) -> {
+            ps.setInt(1, idCliente);
+        });
+        DAOUtils.delete(sql1, con, (ps) -> {
+            ps.setInt(1, idCliente);
         });
     }
 

@@ -2,6 +2,7 @@ package com.licoreria.BusinessLayer.usuarios;
 
 import com.licoreria.dominio.carrito.DetalleProducto;
 import com.licoreria.dominio.carrito.DetalleReceta;
+import com.licoreria.dominio.carrito.Pedido;
 import com.licoreria.dominio.catalogo.Producto;
 import com.licoreria.dominio.catalogo.Receta;
 import com.licoreria.dominio.usuarios.Cliente;
@@ -24,7 +25,7 @@ public interface ClienteBL {
 
 
     Cliente validarCredenciales(String usuario, String password);
-    List<com.licoreria.dominio.carrito.Pedido> getPedidos(int idCliente);
+    List<Pedido> getPedidos(int idCliente);
     void agregarProductoAlCarrito(int idCliente, int idProducto, int cantidad);
     void agregarRecetaAlCarrito(int idCliente, int idReceta, int cantidad);
     void eliminarProductoDelCarrito(int idCliente, int idProducto);
@@ -32,4 +33,5 @@ public interface ClienteBL {
     void actualizarCantidadProductoEnCarrito(int idCliente, int idProducto, int cantidad);
     void actualizarCantidadRecetaEnCarrito(int idCliente, int idReceta, int cantidad);
 
+    void limpiarCarrito(int idCliente);
 }

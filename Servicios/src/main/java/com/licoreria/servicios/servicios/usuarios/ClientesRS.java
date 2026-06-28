@@ -235,4 +235,16 @@ public class ClientesRS {
         }
     }
 
+
+    @POST
+    @Path("/{id}/limpiarCarrito")
+    public Response limpiarCarrito(@PathParam("id") int clientId) {
+        try {
+            clienteBL.limpiarCarrito(clientId);
+            return Response.ok("{\"mensaje\":\"Carrito limpiado correctamente\"}").build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\":\"" + e.getMessage() + "\"}").build();
+        }
+    }
 }
