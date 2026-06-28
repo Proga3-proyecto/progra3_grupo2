@@ -7,8 +7,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RecetaDAOImpl implements RecetaDAO {
 
@@ -257,5 +260,44 @@ public class RecetaDAOImpl implements RecetaDAO {
         return recetas;
     }
 
+
+    @Override
+    public Map<Integer, Receta> getMapByIds(Connection con, List<Integer> idsRecetas) throws SQLException {
+
+        Map<Integer, Receta> resultado = new HashMap<>();
+        List<Receta> recetas = new ArrayList<>();
+
+        if (idsRecetas == null || idsRecetas.isEmpty()) {
+            return resultado;
+        }
+
+        String placeholders = idsRecetas.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(","));
+
+        final String sql = "SELECT id_receta, nombre, descripcion, instrucciones, descuento, precio, precio_final " +
+                "FROM Receta WHERE id_receta  IN (" + placeholders +  ")";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            int index = 1;
+            for (Integer id : idsRecetas) {
+                ps.setInt(index++, id);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Receta receta = mapearReceta(rs);
+                    recetas.add(receta);
+                    resultado.put(receta.getId(), receta);
+                }
+            }
+        }
+
+        Map<Integer, List<ElementoReceta>> mapaElementos = getAllElementosByRecetas(con, idsRecetas);
+        for (Receta receta : recetas) {
+            receta.setElementos(mapaElementos.getOrDefault(receta.getId(), new java.util.ArrayList<>()));
+        }
+        return resultado;
+    }
 
 }

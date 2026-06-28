@@ -8,6 +8,7 @@ import com.licoreria.dominio.catalogo.Receta;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 public interface RecetaDAO extends BaseDAO<Receta, Integer> {
     void cargarImagen(Connection con, Receta receta, Imagen imagen) throws SQLException;
@@ -19,5 +20,8 @@ public interface RecetaDAO extends BaseDAO<Receta, Integer> {
     void removerCategoria(Connection con, Receta receta, Categoria categoria) throws SQLException;
 
     List<Receta> getRecetasPorCliente(Connection con, int idCliente) throws SQLException;
+
+    Map<Integer, Receta> getMapByIds(Connection con, List<Integer> idsRecetas) throws SQLException;
+
 
 }

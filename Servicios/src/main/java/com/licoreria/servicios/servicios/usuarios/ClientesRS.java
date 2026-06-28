@@ -2,9 +2,12 @@ package com.licoreria.servicios.servicios.usuarios;
 
 import com.licoreria.BusinessLayer.usuarios.ClienteBL;
 import com.licoreria.BusinessLayer.usuarios.ClienteBLImpl;
+import com.licoreria.dominio.carrito.DetalleProducto;
+import com.licoreria.dominio.carrito.DetalleReceta;
 import com.licoreria.dominio.catalogo.Producto;
 import com.licoreria.dominio.catalogo.Receta;
 import com.licoreria.dominio.usuarios.Cliente;
+import com.licoreria.dto.ActualizarCantidadRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -35,7 +38,7 @@ public class ClientesRS {
 
     @GET
     @Path("/{id}")
-    public Response getClient(@PathParam("id") int id){
+    public Response getClient(@PathParam("id") int id) {
         try {
             return Response.ok(clienteBL.get(id)).build();
         } catch (Exception e) {
@@ -83,7 +86,7 @@ public class ClientesRS {
     @Path("/{id}/carritoProductos")
     public Response obtenerCarritoProductos(@PathParam("id") int id) {
         try {
-            List<Producto> productos = clienteBL.getProductosEnCarrito(id);
+            List<DetalleProducto> productos = clienteBL.getProductosEnCarrito(id);
             return Response.ok(productos).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -96,7 +99,7 @@ public class ClientesRS {
     @Path("/{id}/carritoRecetas")
     public Response obtenerCarritoRecetas(@PathParam("id") int id) {
         try {
-            List<Receta> recetas = clienteBL.getRecetasEnCarrito(id);
+            List<DetalleReceta> recetas = clienteBL.getRecetasEnCarrito(id);
             return Response.ok(recetas).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -148,7 +151,7 @@ public class ClientesRS {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity("{\"error\":\"ID de producto y cantidad deben ser mayores a 0\"}").build();
             }
-            
+
             clienteBL.agregarProductoAlCarrito(id, request.getIdProducto(), request.getCantidad());
             return Response.status(Response.Status.CREATED)
                     .entity("{\"mensaje\":\"Producto agregado al carrito correctamente\"}").build();
@@ -166,7 +169,7 @@ public class ClientesRS {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity("{\"error\":\"ID de receta y cantidad deben ser mayores a 0\"}").build();
             }
-            
+
             clienteBL.agregarRecetaAlCarrito(id, request.getIdReceta(), request.getCantidad());
             return Response.status(Response.Status.CREATED)
                     .entity("{\"mensaje\":\"Receta agregada al carrito correctamente\"}").build();
@@ -202,7 +205,7 @@ public class ClientesRS {
 
     @PUT
     @Path("/{id}/carritoProductos/{idProducto}")
-    public Response actualizarCantidadProductoEnCarrito(@PathParam("id") int id, @PathParam("idProducto") int idProducto, com.licoreria.dto.ActualizarCantidadRequest request) {
+    public Response actualizarCantidadProductoEnCarrito(@PathParam("id") int id, @PathParam("idProducto") int idProducto, ActualizarCantidadRequest request) {
         try {
             if (request.getCantidad() <= 0) {
                 return Response.status(Response.Status.BAD_REQUEST)
@@ -218,7 +221,7 @@ public class ClientesRS {
 
     @PUT
     @Path("/{id}/carritoRecetas/{idReceta}")
-    public Response actualizarCantidadRecetaEnCarrito(@PathParam("id") int id, @PathParam("idReceta") int idReceta, com.licoreria.dto.ActualizarCantidadRequest request) {
+    public Response actualizarCantidadRecetaEnCarrito(@PathParam("id") int id, @PathParam("idReceta") int idReceta, ActualizarCantidadRequest request) {
         try {
             if (request.getCantidad() <= 0) {
                 return Response.status(Response.Status.BAD_REQUEST)

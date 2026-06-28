@@ -2,28 +2,42 @@ package com.licoreria.BusinessLayer.usuarios;
 
 import com.licoreria.DBmanager.DBManager;
 import com.licoreria.DBmanager.TransactionContext;
-import com.licoreria.dao.catalogo.ProductoDAO;
-import com.licoreria.dao.catalogo.ProductoDAOImpl;
-import com.licoreria.dao.catalogo.RecetaDAOImpl;
+import com.licoreria.dao.carrito.PedidoDAO;
+import com.licoreria.dao.carrito.PedidoDAOImpl;
+import com.licoreria.dao.catalogo.*;
 import com.licoreria.dao.usuarios.ClienteDAO;
 import com.licoreria.dao.usuarios.ClienteDAOImpl;
+import com.licoreria.dominio.carrito.DetalleProducto;
+import com.licoreria.dominio.carrito.DetalleReceta;
+import com.licoreria.dominio.carrito.Pedido;
+import com.licoreria.dominio.catalogo.ElementoReceta;
+import com.licoreria.dominio.catalogo.Imagen;
 import com.licoreria.dominio.catalogo.Producto;
 import com.licoreria.dominio.catalogo.Receta;
 import com.licoreria.dominio.usuarios.Cliente;
+
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 public class ClienteBLImpl implements ClienteBL {
     private final ClienteDAO clienteDAO;
     private final ProductoDAO productoDAO;
     private final RecetaDAOImpl recetaDAO;
-    private final com.licoreria.dao.carrito.PedidoDAO pedidoDAO;
+    private final ImagenDAO imagenDAO;
+    private final PedidoDAO pedidoDAO;
+
     public ClienteBLImpl() {
         this.clienteDAO = new ClienteDAOImpl();
-        productoDAO =  new ProductoDAOImpl();
+        productoDAO = new ProductoDAOImpl();
         recetaDAO = new RecetaDAOImpl();
-        pedidoDAO = new com.licoreria.dao.carrito.PedidoDAOImpl();
+        pedidoDAO = new PedidoDAOImpl();
+        imagenDAO = new ImagenDAOImpl();
     }
 
     @Override
@@ -104,24 +118,68 @@ public class ClienteBLImpl implements ClienteBL {
     }
 
     @Override
-    public List<Producto> getProductosEnCarrito(int idCliente) {
+    public List<DetalleProducto> getProductosEnCarrito(int idCliente) {
         try (Connection con = DBManager.getInstance().getConnection()) {
-            return productoDAO.getProductosPorCliente(con, idCliente);
+
+            List<DetalleProducto> detalles = clienteDAO.getDetalleProductos(con, idCliente);
+            List<Integer> productosids = detalles.stream().map(p -> p.getProducto().getId()).toList();
+            Map<Integer, Producto> productos = productoDAO.getMapByIds(con, productosids);
+            Map<Integer, List<Imagen>> imagenes = imagenDAO.getAllByProducts(con, productosids);
+
+            for (DetalleProducto detalle : detalles) {
+                Producto producto = productos.get(detalle.getProducto().getId());
+                producto.setImagenes(imagenes.get(producto.getId()));
+                detalle.setProducto(producto);
+            }
+
+            return detalles;
         } catch (SQLException e) {
             throw new RuntimeException("Error al obtener productos del carrito", e);
         }
     }
 
     @Override
-    public List<Receta> getRecetasEnCarrito(int idCliente) {
+    public List<DetalleReceta> getRecetasEnCarrito(int idCliente) {
         try (Connection con = DBManager.getInstance().getConnection()) {
-            return recetaDAO.getRecetasPorCliente(con, idCliente);
+            List<DetalleReceta> detalles = clienteDAO.getDetalleReceta(con, idCliente);
+            List<Integer> recetaIds = new ArrayList<>(detalles.stream().map(p -> p.getReceta().getId()).toList());
+            Map<Integer, Receta> recetas = recetaDAO.getMapByIds(con, recetaIds);
+            Map<Integer, List<Imagen>> imagenesRecetas = imagenDAO.getAllByRecetas(con, recetaIds);
+
+            for (DetalleReceta detalle : detalles) {
+                detalle.setReceta(recetas.get(detalle.getReceta().getId()));
+                detalle.getReceta().setImagenes(imagenesRecetas.get(detalle.getReceta().getId()));
+            }
+
+//            List<Integer> productosIds = detalles.stream()
+//                    .flatMap(p -> p.getReceta().getElementos().stream())
+//                    .map(elemento -> elemento.getProducto().getId())
+//                    .toList();
+//
+//            Map<Integer, Producto> products = productoDAO.getMapByIds(con, productosIds);
+//
+//            Map<Integer, List<Imagen>> imagenesProductos = imagenDAO.getAllByProducts(con, productosIds);
+//
+//            for (DetalleReceta detalle : detalles) {
+//                for (ElementoReceta elemento : detalle.getReceta().getElementos()) {
+//                    Producto producto = products.get(elemento.getProducto().getId());
+//                    producto.setImagenes(imagenesProductos.get(producto.getId()));
+//                    elemento.setProducto(producto);
+//                }
+//                Receta receta = detalle.getReceta();
+//                receta.setImagenes(imagenesRecetas.get(receta.getId()));
+//                detalle.setReceta(receta);
+//            }
+
+            return detalles;
+
         } catch (SQLException e) {
             throw new RuntimeException("Error al obtener recetas del carrito", e);
         }
     }
+
     @Override
-    public Cliente validarCredenciales(String usuario, String password){
+    public Cliente validarCredenciales(String usuario, String password) {
         try (Connection con = DBManager.getInstance().getConnection()) {
             return clienteDAO.getPorCorreo(con, usuario, password);
         } catch (Exception e) {
@@ -130,7 +188,7 @@ public class ClienteBLImpl implements ClienteBL {
     }
 
     @Override
-    public List<com.licoreria.dominio.carrito.Pedido> getPedidos(int idCliente) {
+    public List<Pedido> getPedidos(int idCliente) {
         try (Connection con = DBManager.getInstance().getConnection()) {
             return pedidoDAO.getPedidosPorCliente(con, idCliente);
         } catch (SQLException e) {
@@ -148,15 +206,15 @@ public class ClienteBLImpl implements ClienteBL {
                 if (producto == null) {
                     throw new RuntimeException("El producto no existe");
                 }
-                
+
                 double descuentoUnidad = producto.getDescuento();
                 double precioUnidad = producto.getPrecioFinal(); // o getPrecio() dependiendo del requerimiento
-                
+
                 double descuentoTotal = descuentoUnidad * cantidad;
                 double montoTotal = precioUnidad * cantidad;
-                
+
                 clienteDAO.agregarProductoAlCarrito(con, idCliente, idProducto, cantidad, descuentoTotal, montoTotal);
-                
+
                 TransactionContext.commit();
             } catch (Exception e) {
                 TransactionContext.rollback();
@@ -178,15 +236,15 @@ public class ClienteBLImpl implements ClienteBL {
                 if (receta == null) {
                     throw new RuntimeException("La receta no existe");
                 }
-                
+
                 double descuentoUnidad = receta.getDescuento();
-                double precioUnidad = receta.getPrecioFinal(); 
-                
+                double precioUnidad = receta.getPrecioFinal();
+
                 double descuentoTotal = descuentoUnidad * cantidad;
                 double montoTotal = precioUnidad * cantidad;
-                
+
                 clienteDAO.agregarRecetaAlCarrito(con, idCliente, idReceta, cantidad, descuentoTotal, montoTotal);
-                
+
                 TransactionContext.commit();
             } catch (Exception e) {
                 TransactionContext.rollback();
@@ -244,15 +302,15 @@ public class ClienteBLImpl implements ClienteBL {
                 if (producto == null) {
                     throw new RuntimeException("El producto no existe");
                 }
-                
+
                 double descuentoUnidad = producto.getDescuento();
-                double precioUnidad = producto.getPrecioFinal(); 
-                
+                double precioUnidad = producto.getPrecioFinal();
+
                 double descuentoTotal = descuentoUnidad * cantidad;
                 double montoTotal = precioUnidad * cantidad;
-                
+
                 clienteDAO.actualizarCantidadProductoEnCarrito(con, idCliente, idProducto, cantidad, descuentoTotal, montoTotal);
-                
+
                 TransactionContext.commit();
             } catch (Exception e) {
                 TransactionContext.rollback();
@@ -274,15 +332,15 @@ public class ClienteBLImpl implements ClienteBL {
                 if (receta == null) {
                     throw new RuntimeException("La receta no existe");
                 }
-                
+
                 double descuentoUnidad = receta.getDescuento();
-                double precioUnidad = receta.getPrecioFinal(); 
-                
+                double precioUnidad = receta.getPrecioFinal();
+
                 double descuentoTotal = descuentoUnidad * cantidad;
                 double montoTotal = precioUnidad * cantidad;
-                
+
                 clienteDAO.actualizarCantidadRecetaEnCarrito(con, idCliente, idReceta, cantidad, descuentoTotal, montoTotal);
-                
+
                 TransactionContext.commit();
             } catch (Exception e) {
                 TransactionContext.rollback();

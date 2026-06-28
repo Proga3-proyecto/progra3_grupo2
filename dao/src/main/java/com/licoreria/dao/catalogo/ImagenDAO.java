@@ -21,11 +21,16 @@ public interface ImagenDAO extends BaseDAO<Imagen, Integer> {
     Map<Integer, List<Imagen>> getAllByProducts(
             Connection con,
             List<Integer> idsProducto
-
     ) throws SQLException;
 
     Map<Integer, List<Imagen>> getAllByRecetas(
             Connection con,
             List<Integer> idsProducto
     ) throws SQLException;
+
+    Map<Integer,Imagen> getMapByIds(
+            Connection con,
+            List<Integer> ids
+    ) throws SQLException;
+
 }

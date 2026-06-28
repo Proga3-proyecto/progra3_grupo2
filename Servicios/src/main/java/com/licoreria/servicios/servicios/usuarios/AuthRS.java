@@ -43,7 +43,7 @@ public class AuthRS {
             if (admin != null) {
                 LoginResponse successResponse = new LoginResponse(
                         admin.getIdUsuario(),
-                        admin.getNombre(), // O el campo que use tu clase Admin
+                        admin.getNombre(),
                         admin.isMaster() ? "MASTER" : "ADMIN",
                         true,
                         "Inicio de sesión exitoso como Administrador."

@@ -186,14 +186,12 @@ public class ImagenDAOImpl implements ImagenDAO {
             try (ResultSet rs = ps.executeQuery()) {
 
                 while (rs.next()) {
-                    // CORREGIDO: Obteniendo "id_receta" en lugar de "id_producto"
                     Integer idReceta = rs.getInt("id_receta");
 
                     Imagen imagen = new Imagen();
                     imagen.setId(rs.getInt("id_imagen"));
                     imagen.setUrl(rs.getString("url"));
 
-                    // CORREGIDO: Asociando la imagen al ID de la receta en el mapa
                     resultado
                             .computeIfAbsent(idReceta, k -> new ArrayList<>())
                             .add(imagen);
@@ -201,6 +199,31 @@ public class ImagenDAOImpl implements ImagenDAO {
             }
         }
 
+        return resultado;
+    }
+
+    @Override
+    public Map<Integer, Imagen> getMapByIds(Connection con, List<Integer> ids) throws SQLException {
+        String placeholders = ids.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(","));
+        Map<Integer, Imagen> resultado = new HashMap<>();
+        final String sql = "SELECT id_imagen, url FROM Imagen WHERE id_imagen in (" + placeholders + ")";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            int index = 1;
+            for (Integer id : ids) {
+                ps.setInt(index++, id);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Imagen imagen = new Imagen();
+                    imagen.setId(rs.getInt("id_imagen"));
+                    imagen.setUrl(rs.getString("url"));
+
+                    resultado.put(imagen.getId(), imagen);
+                }
+            }
+        }
         return resultado;
     }
 

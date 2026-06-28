@@ -187,7 +187,7 @@ public class ProductoDAOImpl implements ProductoDAO {
 
     @Override
     public List<Producto> getProductosPorCliente(Connection con, int idCliente) throws SQLException {
-        final String sql = "SELECT p.id_producto, p.nombre, p.precio, p.precio_final, p.stock, " +
+        final String sql = "SELECT p.id_producto,p.descripcion, p.nombre, p.precio, p.precio_final, p.stock, " +
                 "p.descuento, p.volumen_litros, p.porcentaje_alcohol, p.id_impuesto, " +
                 "p.id_impuesto_alcohol, p.id_marca " +
                 "FROM Producto p " +
