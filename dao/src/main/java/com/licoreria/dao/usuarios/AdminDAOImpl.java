@@ -13,7 +13,7 @@ public class AdminDAOImpl implements AdminDAO {
     @Override
     public Admin get(Connection con, Integer id) throws SQLException {
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "a.fecha_inicio_admin " +
+                "a.fecha_inicio_admin, a.is_master" +
                 "FROM Admin a " +
                 "INNER JOIN Usuario u ON a.id_usuario = u.id_usuario " +
                 "WHERE a.id_usuario = ?";
@@ -24,7 +24,7 @@ public class AdminDAOImpl implements AdminDAO {
     @Override
     public List<Admin> getAll(Connection con) throws SQLException {
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "a.fecha_inicio_admin " +
+                "a.fecha_inicio_admin, a.is_master " +
                 "FROM Admin a " +
                 "INNER JOIN Usuario u ON a.id_usuario = u.id_usuario";
 
@@ -92,7 +92,6 @@ public class AdminDAOImpl implements AdminDAO {
 
     private Admin mapearAdmin(java.sql.ResultSet rs) throws SQLException {
         Admin admin = new Admin();
-
         admin.setIdUsuario(rs.getInt("id_usuario"));
         admin.setDni(rs.getString("dni"));
         admin.setNombre(rs.getString("nombre"));
@@ -100,16 +99,15 @@ public class AdminDAOImpl implements AdminDAO {
         admin.setCorreo(rs.getString("correo"));
         admin.setContrasenaHash(rs.getString("contrasena_hash"));
         admin.setEstado(EstadoUsuario.valueOf(rs.getString("estado")));
-
         admin.setFechaInicioAdmin(rs.getDate("fecha_inicio_admin"));
-
+        admin.setMaster(rs.getBoolean("is_master"));
         return admin;
     }
 
     @Override
     public Admin getPorCorreo(Connection con, String correo, String contrasena) throws SQLException {
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "a.fecha_inicio_admin " +
+                "a.fecha_inicio_admin,  a.is_master " +
                 "FROM Admin a " +
                 "INNER JOIN Usuario u ON a.id_usuario = u.id_usuario " +
                 "WHERE u.correo = ? AND u.contrasena_hash = ?";
