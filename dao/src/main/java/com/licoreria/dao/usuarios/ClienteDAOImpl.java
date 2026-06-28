@@ -328,7 +328,9 @@ public class ClienteDAOImpl implements ClienteDAO {
                 ps.setInt(1, finalCurrentCantidad + cantidad);
                 ps.setDouble(2, finalCurrentDescuento + descuentoTotal);
                 ps.setDouble(3, finalCurrentMonto + montoTotal);
-
+                ps.setInt(1, finalCantidad + cantidad);
+                ps.setDouble(2, finalDescuento + descuentoTotal);
+                ps.setDouble(3, finalMonto + montoTotal);
                 ps.setInt(4, idCliente);
                 ps.setInt(5, idReceta);
             });
