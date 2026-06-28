@@ -8,6 +8,8 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.List;
+
 @Path("/pedidos")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -22,7 +24,9 @@ public class PedidoRS {
     @GET
     public Response listarTodos() {
         try {
-            return Response.ok(pedidoBL.getAll()).build();
+
+            List<Pedido> pedidos = this.pedidoBL.getAll();
+            return Response.ok(pedidos).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("{\"error\":\"" + e.getMessage() + "\"}").build();

@@ -8,6 +8,7 @@ import com.licoreria.dominio.usuarios.Cliente;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 public interface ClienteDAO extends BaseDAO<Cliente, Integer> {
     Cliente getPorCorreo(Connection con, String correo, String contrasena) throws SQLException;
@@ -27,4 +28,5 @@ public interface ClienteDAO extends BaseDAO<Cliente, Integer> {
     void actualizarCantidadProductoEnCarrito(Connection con, int idCliente, int idProducto, int cantidad, double descuentoTotal, double montoTotal) throws SQLException;
 
     void actualizarCantidadRecetaEnCarrito(Connection con, int idCliente, int idReceta, int cantidad, double descuentoTotal, double montoTotal) throws SQLException;
+    Map<Integer, Cliente> getByIds(Connection con, List<Integer> ids)throws SQLException;
 }

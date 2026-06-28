@@ -11,38 +11,44 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
 
     @Override
     public ProductoSnapshot get(Connection con, Integer id) throws SQLException {
-        final String sql = "SELECT id_producto_snapshot, id_producto_original, nombre, precio_venta, " +
-                "precio_final_venta, descuento_applied, volumen_litros, porcentaje_alcohol, nombre_marca, " +
-                "nombre_impuesto, porcentaje_impuesto, tipo_impuesto, porcentaje_precio_alcohol_historico, " +
-                "valor_impuesto_alcohol_historico FROM Producto_Snapshot WHERE id_producto_snapshot = ?";
+        final String sql = "SELECT ps.id_producto_snapshot, ps.id_producto_original, ps.nombre, ps.precio_venta, " +
+                "ps.precio_final_venta, ps.descuento_applied, ps.volumen_litros, ps.porcentaje_alcohol, ps.nombre_marca, " +
+                "ps.nombre_impuesto, ps.porcentaje_impuesto, ps.tipo_impuesto, ps.porcentaje_precio_alcohol_historico, " +
+                "ps.valor_impuesto_alcohol_historico, ps.id_imagen, i.url AS imagen_url " +
+                "FROM Producto_Snapshot ps " +
+                "LEFT JOIN Imagen i ON ps.id_imagen = i.id_imagen " +
+                "WHERE ps.id_producto_snapshot = ?";
 
         ProductoSnapshot snapshot = DAOUtils.get(sql, con, (ps) -> ps.setInt(1, id), this::mapearSnapshot);
 
         if (snapshot != null) {
             cargarCategorias(con, snapshot);
-            cargarImagenes(con, snapshot);
         }
         return snapshot;
     }
 
     @Override
     public List<ProductoSnapshot> getAll(Connection con) throws SQLException {
-        final String sql = "SELECT id_producto_snapshot, id_producto_original, nombre, precio_venta, " +
-                "precio_final_venta, descuento_applied, volumen_litros, porcentaje_alcohol, nombre_marca, " +
-                "nombre_impuesto, porcentaje_impuesto, tipo_impuesto, porcentaje_precio_alcohol_historico, " +
-                "valor_impuesto_alcohol_historico FROM Producto_Snapshot";
+        final String sql = "SELECT ps.id_producto_snapshot, ps.id_producto_original, ps.nombre, ps.precio_venta, " +
+                "ps.precio_final_venta, ps.descuento_applied, ps.volumen_litros, ps.porcentaje_alcohol, ps.nombre_marca, " +
+                "ps.nombre_impuesto, ps.porcentaje_impuesto, ps.tipo_impuesto, ps.porcentaje_precio_alcohol_historico, " +
+                "ps.valor_impuesto_alcohol_historico, ps.id_imagen, i.url AS imagen_url " +
+                "FROM Producto_Snapshot ps " +
+                "LEFT JOIN Imagen i ON ps.id_imagen = i.id_imagen";
 
         List<ProductoSnapshot> snapshots = DAOUtils.getAll(sql, con, this::mapearSnapshot);
 
         for (ProductoSnapshot snapshot : snapshots) {
             cargarCategorias(con, snapshot);
-            cargarImagenes(con, snapshot);
         }
         return snapshots;
     }
@@ -52,13 +58,12 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
         final String sql = "INSERT INTO Producto_Snapshot (id_producto_original, nombre, precio_venta, " +
                 "precio_final_venta, descuento_applied, volumen_litros, porcentaje_alcohol, nombre_marca, " +
                 "nombre_impuesto, porcentaje_impuesto, tipo_impuesto, porcentaje_precio_alcohol_historico, " +
-                "valor_impuesto_alcohol_historico) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "valor_impuesto_alcohol_historico, id_imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         DAOUtils.save(sql, con, (ps) -> prepararDeclaracion(ps, snapshot), (rs) -> snapshot.setId(rs.getInt(1)));
 
         if (snapshot.getId() != null) {
             guardarCategorias(con, snapshot);
-            guardarImagenes(con, snapshot);
         }
         return snapshot;
     }
@@ -68,19 +73,16 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
         final String sql = "UPDATE Producto_Snapshot SET id_producto_original = ?, nombre = ?, precio_venta = ?, " +
                 "precio_final_venta = ?, descuento_applied = ?, volumen_litros = ?, porcentaje_alcohol = ?, " +
                 "nombre_marca = ?, nombre_impuesto = ?, porcentaje_impuesto = ?, tipo_impuesto = ?, " +
-                "porcentaje_precio_alcohol_historico = ?, valor_impuesto_alcohol_historico = ? " +
+                "porcentaje_precio_alcohol_historico = ?, valor_impuesto_alcohol_historico = ?, id_imagen = ? " +
                 "WHERE id_producto_snapshot = ?";
 
         DAOUtils.update(sql, con, (ps) -> {
             prepararDeclaracion(ps, snapshot);
-            ps.setInt(14, snapshot.getId());
+            ps.setInt(15, snapshot.getId());
         });
 
         eliminarCategorias(con, snapshot.getId());
         guardarCategorias(con, snapshot);
-
-        eliminarImagenes(con, snapshot.getId());
-        guardarImagenes(con, snapshot);
 
         return snapshot;
     }
@@ -88,12 +90,44 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
     @Override
     public void remove(Connection con, ProductoSnapshot snapshot) throws SQLException {
         eliminarCategorias(con, snapshot.getId());
-        eliminarImagenes(con, snapshot.getId());
 
         final String sql = "DELETE FROM Producto_Snapshot WHERE id_producto_snapshot = ?";
         DAOUtils.delete(sql, con, (ps) -> ps.setInt(1, snapshot.getId()));
     }
 
+    @Override
+    public Map<Integer, ProductoSnapshot> getMapByIds(Connection con, List<Integer> idsSnapshots) throws SQLException {
+        Map<Integer, ProductoSnapshot> resultado = new HashMap<>();
+        if (idsSnapshots == null || idsSnapshots.isEmpty()) return resultado;
+
+        String placeholders = idsSnapshots.stream().map(id -> "?").collect(Collectors.joining(","));
+        String sql = "SELECT ps.id_producto_snapshot, ps.id_producto_original, ps.nombre, ps.precio_venta, " +
+                "ps.precio_final_venta, ps.descuento_applied, ps.volumen_litros, ps.porcentaje_alcohol, ps.nombre_marca, " +
+                "ps.nombre_impuesto, ps.porcentaje_impuesto, ps.tipo_impuesto, ps.porcentaje_precio_alcohol_historico, " +
+                "ps.valor_impuesto_alcohol_historico, ps.id_imagen, i.url AS imagen_url " +
+                "FROM Producto_Snapshot ps " +
+                "LEFT JOIN Imagen i ON ps.id_imagen = i.id_imagen " +
+                "WHERE ps.id_producto_snapshot IN (" + placeholders + ")";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            int index = 1;
+            for (Integer id : idsSnapshots) {
+                ps.setInt(index++, id);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProductoSnapshot snapshot = mapearSnapshot(rs);
+                    resultado.put(snapshot.getId(), snapshot);
+                }
+            }
+        }
+
+        for (ProductoSnapshot snapshot : resultado.values()) {
+            cargarCategorias(con, snapshot);
+        }
+
+        return resultado;
+    }
 
     private void cargarCategorias(Connection con, ProductoSnapshot snapshot) throws SQLException {
         final String sql = "SELECT nombre_categoria FROM Producto_Snapshot_Categoria WHERE id_producto_snapshot = ?";
@@ -121,45 +155,6 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
         DAOUtils.delete(sql, con, (ps) -> ps.setInt(1, idSnapshot));
     }
 
-    private void cargarImagenes(Connection con, ProductoSnapshot snapshot) throws SQLException {
-        final String sql = "SELECT i.id_imagen, i.url FROM Imagen i " +
-                "INNER JOIN Producto_Snapshot_Imagen psi ON i.id_imagen = psi.id_imagen " +
-                "WHERE psi.id_producto_snapshot = ?";
-
-        List<Imagen> imagenes = DAOUtils.getAll(sql, con,
-                (ps) -> ps.setInt(1, snapshot.getId()),
-                (rs) -> {
-                    Imagen img = new Imagen();
-                    img.setId(rs.getInt("id_imagen"));
-                    img.setUrl(rs.getString("url"));
-                    return img;
-                }
-        );
-        snapshot.setImagenesHistoricas(imagenes);
-    }
-
-    private void guardarImagenes(Connection con, ProductoSnapshot snapshot) throws SQLException {
-        if (snapshot.getImagenesHistoricas() == null || snapshot.getImagenesHistoricas().isEmpty()) return;
-
-        final String sql = "INSERT INTO Producto_Snapshot_Imagen (id_producto_snapshot, id_imagen, principal) VALUES (?, ?, ?)";
-        boolean isFirst = true;
-
-        for (Imagen img : snapshot.getImagenesHistoricas()) {
-            final boolean principal = isFirst;
-            isFirst = false;
-
-            DAOUtils.save(sql, con, (ps) -> {
-                ps.setInt(1, snapshot.getId());
-                ps.setInt(2, img.getId());
-                ps.setBoolean(3, principal);
-            }, (rs) -> {});
-        }
-    }
-
-    private void eliminarImagenes(Connection con, Integer idSnapshot) throws SQLException {
-        final String sql = "DELETE FROM Producto_Snapshot_Imagen WHERE id_producto_snapshot = ?";
-        DAOUtils.delete(sql, con, (ps) -> ps.setInt(1, idSnapshot));
-    }
 
     private ProductoSnapshot mapearSnapshot(ResultSet rs) throws SQLException {
         ProductoSnapshot snapshot = new ProductoSnapshot();
@@ -185,6 +180,15 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
         snapshot.setPorcentajePrecioAlcoholHistorico(rs.getInt("porcentaje_precio_alcohol_historico"));
         snapshot.setValorImpuestoAlcoholHistorico(rs.getDouble("valor_impuesto_alcohol_historico"));
 
+        // Mapeo de la imagen si existe
+        int idImagen = rs.getInt("id_imagen");
+        if (!rs.wasNull()) {
+            Imagen img = new Imagen();
+            img.setId(idImagen);
+            img.setUrl(rs.getString("imagen_url"));
+            snapshot.setImagen(img);
+        }
+
         return snapshot;
     }
 
@@ -206,7 +210,6 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
         ps.setDouble(10, snapshot.getPorcentajeImpuesto());
         ps.setString(11, snapshot.getTipoImpuesto().name());
 
-        // Manejo Null-Safe para los primitivos Wrappers
         if (snapshot.getPorcentajePrecioAlcoholHistorico() != null) {
             ps.setInt(12, snapshot.getPorcentajePrecioAlcoholHistorico());
         } else {
@@ -217,6 +220,12 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
             ps.setDouble(13, snapshot.getValorImpuestoAlcoholHistorico());
         } else {
             ps.setDouble(13, 0.0);
+        }
+
+        if (snapshot.getImagen() != null && snapshot.getImagen().getId() != null) {
+            ps.setInt(14, snapshot.getImagen().getId());
+        } else {
+            ps.setNull(14, Types.INTEGER);
         }
     }
 }

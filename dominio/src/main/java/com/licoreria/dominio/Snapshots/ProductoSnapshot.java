@@ -25,15 +25,25 @@ public class ProductoSnapshot {
 
     private Integer porcentajePrecioAlcoholHistorico;
     private Double valorImpuestoAlcoholHistorico;
+    private Imagen imagen;
 
     private List<String> categoriasHistoricas;
-    private List<Imagen> imagenesHistoricas;
+
+
+
+    public Imagen getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(Imagen imagen) {
+        this.imagen = imagen;
+    }
+
 
 
     public ProductoSnapshot(){
-        categoriasHistoricas = new ArrayList<>();
-        imagenesHistoricas = new ArrayList<>();
     }
+
     public ProductoSnapshot(Producto producto) {
         this();
 
@@ -64,15 +74,14 @@ public class ProductoSnapshot {
                 this.valorImpuestoAlcoholHistorico = 0.0;
             }
 
-            if (producto.getCategorias() != null) {
-                for (Categoria cat : producto.getCategorias()) {
-                    this.categoriasHistoricas.add(cat.getNombre());
-                }
+            if(producto.getCategorias() != null) {
+                this.categoriasHistoricas = producto.getCategorias().stream().map(Categoria::getNombre).toList();
             }
 
-            if (producto.getImagenes() != null) {
-                this.imagenesHistoricas.addAll(producto.getImagenes());
+            if(producto.getImagenes() != null){
+                imagen = producto.getImagenes().getFirst();
             }
+
         }
     }
 
@@ -187,7 +196,6 @@ public class ProductoSnapshot {
     public void setValorImpuestoAlcoholHistorico(Double valorImpuestoAlcoholHistorico) {
         this.valorImpuestoAlcoholHistorico = valorImpuestoAlcoholHistorico;
     }
-
     public List<String> getCategoriasHistoricas() {
         return categoriasHistoricas;
     }
@@ -196,13 +204,6 @@ public class ProductoSnapshot {
         this.categoriasHistoricas = categoriasHistoricas;
     }
 
-    public List<Imagen> getImagenesHistoricas() {
-        return imagenesHistoricas;
-    }
-
-    public void setImagenesHistoricas(List<Imagen> imagenesHistoricas) {
-        this.imagenesHistoricas = imagenesHistoricas;
-    }
 
 
 }

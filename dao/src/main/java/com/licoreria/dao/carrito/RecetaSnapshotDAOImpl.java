@@ -12,20 +12,24 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RecetaSnapshotDAOImpl implements RecetaSnapshotDAO {
 
     @Override
     public RecetaSnapshot get(Connection con, Integer id) throws SQLException {
-        final String sql = "SELECT id_receta_snapshot, id_receta_original, nombre, descripcion, " +
-                "instrucciones, precio_historico, precio_final_historico " +
-                "FROM Receta_Snapshot WHERE id_receta_snapshot = ?";
+        final String sql = "SELECT rs.id_receta_snapshot, rs.id_receta_original, rs.nombre, " +
+                "rs.precio_historico, rs.precio_final_historico, rs.id_imagen, i.url AS imagen_url " +
+                "FROM Receta_Snapshot rs " +
+                "LEFT JOIN Imagen i ON rs.id_imagen = i.id_imagen " +
+                "WHERE rs.id_receta_snapshot = ?";
 
         RecetaSnapshot snapshot = DAOUtils.get(sql, con, (ps) -> ps.setInt(1, id), this::mapearSnapshot);
 
         if (snapshot != null) {
-            cargarImagenes(con, snapshot);
             cargarElementos(con, snapshot);
         }
         return snapshot;
@@ -33,14 +37,14 @@ public class RecetaSnapshotDAOImpl implements RecetaSnapshotDAO {
 
     @Override
     public List<RecetaSnapshot> getAll(Connection con) throws SQLException {
-        final String sql = "SELECT id_receta_snapshot, id_receta_original, nombre, descripcion, " +
-                "instrucciones, precio_historico, precio_final_historico " +
-                "FROM Receta_Snapshot";
+        final String sql = "SELECT rs.id_receta_snapshot, rs.id_receta_original, rs.nombre, " +
+                "rs.precio_historico, rs.precio_final_historico, rs.id_imagen, i.url AS imagen_url " +
+                "FROM Receta_Snapshot rs " +
+                "LEFT JOIN Imagen i ON rs.id_imagen = i.id_imagen ";
 
         List<RecetaSnapshot> snapshots = DAOUtils.getAll(sql, con, this::mapearSnapshot);
 
         for (RecetaSnapshot snapshot : snapshots) {
-            cargarImagenes(con, snapshot);
             cargarElementos(con, snapshot);
         }
         return snapshots;
@@ -48,13 +52,12 @@ public class RecetaSnapshotDAOImpl implements RecetaSnapshotDAO {
 
     @Override
     public RecetaSnapshot save(Connection con, RecetaSnapshot snapshot) throws SQLException {
-        final String sql = "INSERT INTO Receta_Snapshot (id_receta_original, nombre, descripcion, " +
-                "instrucciones, precio_historico, precio_final_historico) VALUES (?, ?, ?, ?, ?, ?)";
+        final String sql = "INSERT INTO Receta_Snapshot (id_receta_original, nombre, " +
+                "precio_historico, precio_final_historico, id_imagen) VALUES (?, ?, ?, ?, ?)";
 
         DAOUtils.save(sql, con, (ps) -> prepararDeclaracion(ps, snapshot), (rs) -> snapshot.setId(rs.getInt(1)));
 
         if (snapshot.getId() != null) {
-            guardarImagenes(con, snapshot);
             guardarElementos(con, snapshot);
         }
         return snapshot;
@@ -62,17 +65,14 @@ public class RecetaSnapshotDAOImpl implements RecetaSnapshotDAO {
 
     @Override
     public RecetaSnapshot update(Connection con, RecetaSnapshot snapshot) throws SQLException {
-        final String sql = "UPDATE Receta_Snapshot SET id_receta_original = ?, nombre = ?, descripcion = ?, " +
-                "instrucciones = ?, precio_historico = ?, precio_final_historico = ? " +
+        final String sql = "UPDATE Receta_Snapshot SET id_receta_original = ?, nombre = ?, " +
+                "precio_historico = ?, precio_final_historico = ?, id_imagen = ? " +
                 "WHERE id_receta_snapshot = ?";
 
         DAOUtils.update(sql, con, (ps) -> {
             prepararDeclaracion(ps, snapshot);
-            ps.setInt(7, snapshot.getId());
+            ps.setInt(6, snapshot.getId());
         });
-
-        eliminarImagenes(con, snapshot.getId());
-        guardarImagenes(con, snapshot);
 
         eliminarElementos(con, snapshot.getId());
         guardarElementos(con, snapshot);
@@ -82,51 +82,42 @@ public class RecetaSnapshotDAOImpl implements RecetaSnapshotDAO {
 
     @Override
     public void remove(Connection con, RecetaSnapshot snapshot) throws SQLException {
-        eliminarImagenes(con, snapshot.getId());
         eliminarElementos(con, snapshot.getId());
 
         final String sql = "DELETE FROM Receta_Snapshot WHERE id_receta_snapshot = ?";
         DAOUtils.delete(sql, con, (ps) -> ps.setInt(1, snapshot.getId()));
     }
 
-    private void cargarImagenes(Connection con, RecetaSnapshot snapshot) throws SQLException {
-        final String sql = "SELECT i.id_imagen, i.url FROM Imagen i " +
-                "INNER JOIN Receta_Snapshot_Imagen rsi ON i.id_imagen = rsi.id_imagen " +
-                "WHERE rsi.id_receta_snapshot = ?";
+    @Override
+    public Map<Integer, RecetaSnapshot> getMapByIds(Connection con, List<Integer> idsSnapshots) throws SQLException {
+        Map<Integer, RecetaSnapshot> resultado = new HashMap<>();
+        if (idsSnapshots == null || idsSnapshots.isEmpty()) return resultado;
 
-        List<Imagen> imagenes = DAOUtils.getAll(sql, con,
-                (ps) -> ps.setInt(1, snapshot.getId()),
-                (rs) -> {
-                    Imagen img = new Imagen();
-                    img.setId(rs.getInt("id_imagen"));
-                    img.setUrl(rs.getString("url"));
-                    return img;
+        String placeholders = idsSnapshots.stream().map(id -> "?").collect(Collectors.joining(","));
+        String sql = "SELECT rs.id_receta_snapshot, rs.id_receta_original, rs.nombre, " +
+                "rs.precio_historico, rs.precio_final_historico, rs.id_imagen, i.url AS imagen_url " +
+                "FROM Receta_Snapshot rs " +
+                "LEFT JOIN Imagen i ON rs.id_imagen = i.id_imagen " +
+                "WHERE rs.id_receta_snapshot IN (" + placeholders + ")";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            int index = 1;
+            for (Integer id : idsSnapshots) {
+                ps.setInt(index++, id);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    RecetaSnapshot snapshot = mapearSnapshot(rs);
+                    resultado.put(snapshot.getId(), snapshot);
                 }
-        );
-        snapshot.setImagenesHistoricas(imagenes);
-    }
-
-    private void guardarImagenes(Connection con, RecetaSnapshot snapshot) throws SQLException {
-        if (snapshot.getImagenesHistoricas() == null || snapshot.getImagenesHistoricas().isEmpty()) return;
-
-        final String sql = "INSERT INTO Receta_Snapshot_Imagen (id_receta_snapshot, id_imagen, principal) VALUES (?, ?, ?)";
-        boolean isFirst = true; // El primer elemento insertado se marca como principal
-
-        for (Imagen img : snapshot.getImagenesHistoricas()) {
-            final boolean principal = isFirst;
-            isFirst = false;
-
-            DAOUtils.save(sql, con, (ps) -> {
-                ps.setInt(1, snapshot.getId());
-                ps.setInt(2, img.getId());
-                ps.setBoolean(3, principal);
-            }, (rs) -> {});
+            }
         }
-    }
 
-    private void eliminarImagenes(Connection con, Integer idSnapshot) throws SQLException {
-        final String sql = "DELETE FROM Receta_Snapshot_Imagen WHERE id_receta_snapshot = ?";
-        DAOUtils.delete(sql, con, (ps) -> ps.setInt(1, idSnapshot));
+        for (RecetaSnapshot snapshot : resultado.values()) {
+            cargarElementos(con, snapshot);
+        }
+
+        return resultado;
     }
 
     private void cargarElementos(Connection con, RecetaSnapshot snapshot) throws SQLException {
@@ -136,7 +127,6 @@ public class RecetaSnapshotDAOImpl implements RecetaSnapshotDAO {
                 (ps) -> ps.setInt(1, snapshot.getId()),
                 (rs) -> {
                     RecetaSnapshotElemento elemento = new RecetaSnapshotElemento();
-                    elemento.setRecetaSnapshot(snapshot);
                     elemento.setCantidad(rs.getDouble("cantidad"));
 
                     ProductoSnapshot productoSnapshot = new ProductoSnapshot();
@@ -185,10 +175,16 @@ public class RecetaSnapshotDAOImpl implements RecetaSnapshotDAO {
         }
 
         snapshot.setNombre(rs.getString("nombre"));
-        snapshot.setDescripcion(rs.getString("descripcion"));
-        snapshot.setInstrucciones(rs.getString("instrucciones"));
         snapshot.setPrecioHistorico(rs.getDouble("precio_historico"));
         snapshot.setPrecioFinalHistorico(rs.getDouble("precio_final_historico"));
+
+        int idImagen = rs.getInt("id_imagen");
+        if (!rs.wasNull()) {
+            Imagen img = new Imagen();
+            img.setId(idImagen);
+            img.setUrl(rs.getString("imagen_url"));
+            snapshot.setImagen(img);
+        }
 
         return snapshot;
     }
@@ -201,9 +197,13 @@ public class RecetaSnapshotDAOImpl implements RecetaSnapshotDAO {
         }
 
         ps.setString(2, snapshot.getNombre());
-        ps.setString(3, snapshot.getDescripcion());
-        ps.setString(4, snapshot.getInstrucciones());
-        ps.setDouble(5, snapshot.getPrecioHistorico());
-        ps.setDouble(6, snapshot.getPrecioFinalHistorico());
+        ps.setDouble(3, snapshot.getPrecioHistorico());
+        ps.setDouble(4, snapshot.getPrecioFinalHistorico());
+
+        if (snapshot.getImagen() != null && snapshot.getImagen().getId() != null) {
+            ps.setInt(5, snapshot.getImagen().getId());
+        } else {
+            ps.setNull(5, Types.INTEGER);
+        }
     }
 }

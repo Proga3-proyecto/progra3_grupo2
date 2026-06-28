@@ -11,15 +11,12 @@ public class RecetaSnapshot {
     private Integer id;
     private Receta recetaOriginal;
     private String nombre;
-    private String descripcion;
-    private String instrucciones;
     private double precioHistorico;
     private double precioFinalHistorico;
-    private List<Imagen> imagenesHistoricas;
+    private Imagen imagen;
     private List<RecetaSnapshotElemento> elementosHistoricos;
 
     public RecetaSnapshot() {
-        this.imagenesHistoricas = new ArrayList<>();
         this.elementosHistoricos = new ArrayList<>();
     }
 
@@ -29,18 +26,16 @@ public class RecetaSnapshot {
         if (receta != null) {
             this.recetaOriginal = receta;
             this.nombre = receta.getNombre();
-            this.descripcion = receta.getDescripcion();
-            this.instrucciones = receta.getInstrucciones();
             this.precioHistorico = receta.getPrecio();
             this.precioFinalHistorico = receta.getPrecioFinal();
 
             if (receta.getImagenes() != null) {
-                this.imagenesHistoricas.addAll(receta.getImagenes());
+                imagen = receta.getImagenes().getFirst();
             }
 
             if (receta.getElementos() != null) {
                 for (ElementoReceta elementoVivo : receta.getElementos()) {
-                    RecetaSnapshotElemento elementoHistorico = new RecetaSnapshotElemento(elementoVivo, this);
+                    RecetaSnapshotElemento elementoHistorico = new RecetaSnapshotElemento(elementoVivo);
                     this.elementosHistoricos.add(elementoHistorico);
                 }
             }
@@ -71,22 +66,6 @@ public class RecetaSnapshot {
         this.nombre = nombre;
     }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public String getInstrucciones() {
-        return instrucciones;
-    }
-
-    public void setInstrucciones(String instrucciones) {
-        this.instrucciones = instrucciones;
-    }
-
     public double getPrecioHistorico() {
         return precioHistorico;
     }
@@ -103,12 +82,12 @@ public class RecetaSnapshot {
         this.precioFinalHistorico = precioFinalHistorico;
     }
 
-    public List<Imagen> getImagenesHistoricas() {
-        return imagenesHistoricas;
+    public Imagen getImagen() {
+        return imagen;
     }
 
-    public void setImagenesHistoricas(List<Imagen> imagenesHistoricas) {
-        this.imagenesHistoricas = imagenesHistoricas;
+    public void setImagen(Imagen imagen) {
+        this.imagen = imagen;
     }
 
     public List<RecetaSnapshotElemento> getElementosHistoricos() {

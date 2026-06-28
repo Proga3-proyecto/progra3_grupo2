@@ -9,11 +9,13 @@ import com.licoreria.dominio.catalogo.Receta;
 import com.licoreria.dominio.usuarios.Cliente;
 import com.licoreria.dominio.usuarios.ClienteDireccion;
 import com.licoreria.dominio.usuarios.EstadoUsuario;
+import com.mysql.cj.xdevapi.Client;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ClienteDAOImpl implements ClienteDAO {
 
@@ -209,6 +211,72 @@ public class ClienteDAOImpl implements ClienteDAO {
 
         return cliente;
     }
+
+    @Override
+    public Map<Integer, Cliente> getByIds(Connection con, List<Integer> ids)throws SQLException{
+        Map<Integer, Cliente> resultado = new HashMap<>();
+        if (ids == null || ids.isEmpty()) {
+            return resultado;
+        }
+        String placeholders = ids.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(","));
+
+        final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
+                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo, u.created_at " +
+                "FROM Cliente c " +
+                "INNER JOIN Usuario u ON c.id_usuario = u.id_usuario " +
+                "WHERE c.id_usuario IN (" + placeholders + ")";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            int index = 1;
+            for (Integer id : ids) {
+                ps.setInt(index++, id);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Cliente cliente = mapearCliente(rs);
+                    resultado.put(cliente.getIdUsuario(), cliente);
+                }
+            }
+        }
+
+        return resultado;
+    }
+
+//    @Override
+//    public Map<Integer, Producto> getMapByIds(Connection con, List<Integer> idsProductos) throws SQLException {
+//
+//
+//        if (idsProductos == null || idsProductos.isEmpty()) {
+//            return resultado;
+//        }
+//
+//        String placeholders = idsProductos.stream()
+//                .map(id -> "?")
+//                .collect(Collectors.joining(","));
+//
+//        String sql = "SELECT id_producto, nombre, descripcion, precio, precio_final, stock, descuento, volumen_litros, " +
+//                "porcentaje_alcohol, id_impuesto, id_impuesto_alcohol, id_marca " +
+//                "FROM Producto WHERE id_producto IN (" + placeholders + ")";
+//
+//        try (PreparedStatement ps = con.prepareStatement(sql)) {
+//            int index = 1;
+//            for (Integer id : idsProductos) {
+//                ps.setInt(index++, id);
+//            }
+//
+//            try (ResultSet rs = ps.executeQuery()) {
+//                while (rs.next()) {
+//                    Cliente cliente = mapearCliente(rs);
+//                    resultado.put(producto.getId(), producto);
+//                }
+//            }
+//        }
+//
+//        return resultado;
+//    }
 
     @Override
     public void agregarProductoAlCarrito(Connection con, int idCliente, int idProducto, int cantidad, double descuentoTotal, double montoTotal) throws SQLException {

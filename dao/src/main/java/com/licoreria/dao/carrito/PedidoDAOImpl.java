@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public class PedidoDAOImpl implements PedidoDAO {
@@ -194,9 +196,20 @@ public class PedidoDAOImpl implements PedidoDAO {
         cliente.setIdUsuario(rs.getInt("id_cliente"));
         pedido.setCliente(cliente);
 
-        pedido.setFechaPedido(rs.getDate("fecha_pedido"));
-        pedido.setHoraInicio(rs.getTime("hora_inicio"));
-        pedido.setHoraFin(rs.getTime("hora_fin"));
+        java.sql.Date fecha = rs.getDate("fecha_pedido");
+        if (fecha != null) {
+            pedido.setFechaPedido(new java.util.Date(fecha.getTime()));
+        }
+
+        java.sql.Time horaInicio = rs.getTime("hora_inicio");
+        if (horaInicio != null) {
+            pedido.setHoraInicio(new java.util.Date(horaInicio.getTime()));
+        }
+
+        java.sql.Time horaFin = rs.getTime("hora_fin");
+        if (horaFin != null) {
+            pedido.setHoraFin(new java.util.Date(horaFin.getTime()));
+        }
 
         pedido.setPrecioTotal(rs.getDouble("precio_total"));
         pedido.setTotalImpuestos(rs.getDouble("total_impuestos"));
