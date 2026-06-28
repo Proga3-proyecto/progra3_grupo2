@@ -52,7 +52,7 @@ public class ProductoBLImpl implements ProductoBL {
         try (Connection con = DBManager.getInstance().getConnection()) {
             Producto producto = productoDAO.get(con, id);
             if (producto == null) return null;
-            producto.setMarca(marcaDAO.get(con, producto.getId()));
+            producto.setMarca(marcaDAO.get(con, producto.getMarca().getId()));
             producto.setCategorias(categoriaDAO.getAllByProducto(con, producto));
             producto.setImagenes(imagenDAO.getAllByProduct(con, producto));
             return producto;
