@@ -220,6 +220,15 @@ public class RecetaDAOImpl implements RecetaDAO {
         });
     }
 
+    @Override
+    public void removerImagen(Connection con, int idReceta, int idImagen) throws SQLException {
+        final String sql = "DELETE FROM RecetaImagen WHERE id_receta = ? AND id_imagen = ?";
+        DAOUtils.delete(sql, con, (ps) -> {
+            ps.setInt(1, idReceta);
+            ps.setInt(2, idImagen);
+        });
+    }
+
     // En RecetaDAOImpl.java
     @Override
     public void asignarCategoria(Connection con, Receta receta, Categoria categoria) throws SQLException {

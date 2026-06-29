@@ -4,6 +4,7 @@ import com.licoreria.BusinessLayer.catalogo.RecetaBL;
 import com.licoreria.BusinessLayer.catalogo.RecetaBLImpl;
 import com.licoreria.SupabaseDriver.SupabaseDriver;
 import com.licoreria.dominio.catalogo.Categoria;
+import com.licoreria.dominio.catalogo.Imagen;
 import com.licoreria.dominio.catalogo.Receta;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -93,20 +94,38 @@ public class RecetasRS {
 
         try {
             String url = this.supabaseDriver.upload(detalle.getFileName(), archivo);
-            recetaBL.agregarImagen(receta, url);
-            return Response.ok("Imagen subida correctamente").build();
+            Imagen imagen = recetaBL.agregarImagen(receta, url);
+            return Response.ok(imagen).build();
         } catch (Exception e) {
             return Response.status(500).entity("Error: " + e.getMessage()).build();
         }
     }
 
-    @POST
-    @Path("/{id}/subirPrincipal")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response subirImagenPrincipal(@PathParam("id") int id,
-                                         @FormDataParam("archivo") InputStream archivo,
-                                         @FormDataParam("archivo") FormDataContentDisposition detalle) {
-        return Response.ok("Imagen principal actualizada").build();
+    @DELETE
+    @Path("/{id}/imagen/{idImagen}")
+    public Response eliminarImagen(@PathParam("id") int idReceta, @PathParam("idImagen") int idImagen) {
+        try {
+            recetaBL.removerImagen(idReceta, idImagen);
+            return Response.ok("Imagen eliminada: ").build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al eliminar: " + e.getMessage()).build();
+        }
+    }
+
+    @PUT
+    @Path("/{id}/imagenPrincipal/{idImagen}")
+    public Response asignarImagenPrincipal(@PathParam("id") int id, @PathParam("idImagen") int idImagen) {
+        Receta receta = recetaBL.get(id);
+        if (receta == null) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No encontro la receta").build();
+        }
+        try {
+            recetaBL.agregarImagenPrincipal(receta, idImagen);
+            return Response.ok("Imagen asignada").build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al asignar: " + e.getMessage()).build();
+        }
     }
 
 
