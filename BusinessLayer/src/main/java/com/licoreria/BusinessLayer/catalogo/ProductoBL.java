@@ -1,6 +1,7 @@
 package com.licoreria.BusinessLayer.catalogo;
 
 import com.licoreria.dominio.catalogo.Categoria;
+import com.licoreria.dominio.catalogo.Imagen;
 import com.licoreria.dominio.catalogo.Marca;
 import com.licoreria.dominio.catalogo.Producto;
 
@@ -13,8 +14,8 @@ public interface ProductoBL {
     void delete(int id);
     Producto save(Producto producto);
     Producto update(Producto producto);
-    void agregarImagen(Producto producto,String url);
-    void agregarImagenPrincipal(Producto producto,String url);
+    Imagen agregarImagen(Producto producto, String url);
+    void agregarImagenPrincipal(Producto producto,int idImagen);
     void removerImagen(int idProducto, int imagen);
     void eliminarCategoria(Producto producto, String categoria);
     void agregarCategoria(Producto producto, Categoria categoria);

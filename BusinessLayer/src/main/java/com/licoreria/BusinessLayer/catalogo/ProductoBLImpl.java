@@ -189,7 +189,7 @@ public class ProductoBLImpl implements ProductoBL {
     }
 
     @Override
-    public void agregarImagen(Producto producto, String url) {
+    public Imagen agregarImagen(Producto producto, String url) {
         Imagen imagen = new Imagen(url);
         try {
             Connection con = TransactionContext.getConnection();
@@ -198,11 +198,12 @@ public class ProductoBLImpl implements ProductoBL {
                 if (imageDB == null) {
                     imagenDAO.save(con, imagen);
                 } else {
-                    throw new RuntimeException("La imagen ya esta cargada");
+                    imagen = imageDB;
                 }
 
                 productoDAO.cargarImagen(con, producto, imagen);
                 TransactionContext.commit();
+                return imagen;
             } catch (SQLException e) {
                 TransactionContext.rollback();
                 throw new RuntimeException(e);
@@ -215,18 +216,14 @@ public class ProductoBLImpl implements ProductoBL {
     }
 
     @Override
-    public void agregarImagenPrincipal(Producto producto, String url) {
-        Imagen imagen = new Imagen(url);
+    public void agregarImagenPrincipal(Producto producto, int idImagen) {
         try {
             Connection con = TransactionContext.getConnection();
             try {
-                Imagen imageDB = imagenDAO.get(con, url);
-                if (imageDB == null) {
-                    imagenDAO.save(con, imagen);
-                } else {
-                    throw new RuntimeException("La imagen ya esta cargada");
+                Imagen imagen = imagenDAO.get(con, idImagen);
+                if (imagen == null) {
+                    throw new RuntimeException("La imagen no  esta cargada");
                 }
-
                 productoDAO.asignarImagenPrincipal(con, producto, imagen);
                 TransactionContext.commit();
             } catch (SQLException e) {

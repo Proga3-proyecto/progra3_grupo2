@@ -6,6 +6,7 @@ import com.licoreria.BusinessLayer.catalogo.ProductoBL;
 import com.licoreria.BusinessLayer.catalogo.ProductoBLImpl;
 import com.licoreria.SupabaseDriver.SupabaseDriver;
 import com.licoreria.dominio.catalogo.Categoria;
+import com.licoreria.dominio.catalogo.Imagen;
 import com.licoreria.dominio.catalogo.Marca;
 import com.licoreria.dominio.catalogo.Producto;
 
@@ -119,12 +120,12 @@ public class ProductosRS {
         try {
             String nombre = detalle.getFileName();
             String url = this.supabaseDriver.upload(nombre, archivo);
-            productoBO.agregarImagen(producto, url);
+            Imagen imagen = productoBO.agregarImagen(producto, url);
+            return Response.ok(imagen).build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al subir a Drive: " + e.getMessage()).build();
         }
-        return Response.ok("Archivo recibido: ").build();
     }
 
     @DELETE
@@ -138,24 +139,21 @@ public class ProductosRS {
         }
     }
 
-    @POST
-    @Path("/{id}/imagenPrincipal")
+    @PUT
+    @Path("/{id}/imagenPrincipal/{idImagen}")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response subirImagenPrincipal(@PathParam("id") int id, @FormDataParam("archivo") InputStream archivo, @FormDataParam("archivo") FormDataContentDisposition detalle) {
+    public Response asignarImagenPrincipal(@PathParam("id") int id, @PathParam("idImagen") int idImagen) {
         Producto producto = productoBO.get(id);
-
         if (producto == null) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No encontro el producto").build();
         }
-        String nombre = detalle.getFileName();
         try {
-            String url = this.supabaseDriver.upload(nombre, archivo);
-            productoBO.agregarImagenPrincipal(producto, url);
+            productoBO.agregarImagenPrincipal(producto, idImagen);
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al subir a Drive: " + e.getMessage()).build();
         }
-        return Response.ok("Archivo recibido: " + nombre).build();
+        return Response.ok("Imagen asignada").build();
     }
 
     @DELETE
