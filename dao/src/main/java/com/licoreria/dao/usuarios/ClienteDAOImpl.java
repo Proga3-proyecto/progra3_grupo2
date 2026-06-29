@@ -22,7 +22,7 @@ public class ClienteDAOImpl implements ClienteDAO {
     @Override
     public Cliente get(Connection con, Integer id) throws SQLException {
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo, u.created_at " +
+                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo, u.created_at, u.updated_at " +
                 "FROM Cliente c " +
                 "INNER JOIN Usuario u ON c.id_usuario = u.id_usuario " +
                 "WHERE c.id_usuario = ?";
@@ -39,7 +39,7 @@ public class ClienteDAOImpl implements ClienteDAO {
     @Override
     public List<Cliente> getAll(Connection con) throws SQLException {
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo, u.created_at " +
+                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo, u.created_at, u.updated_at " +
                 "FROM Cliente c " +
                 "INNER JOIN Usuario u ON c.id_usuario = u.id_usuario";
 
@@ -186,7 +186,8 @@ public class ClienteDAOImpl implements ClienteDAO {
         cliente.setEstado(EstadoUsuario.valueOf(rs.getString("estado")));
         cliente.setTelefono(rs.getString("telefono"));
         cliente.setFechaNacimiento(rs.getDate("fecha_nacimiento"));
-        cliente.setCreatedAt(rs.getDate("created_at"));
+        cliente.setCreatedAt(rs.getTimestamp("created_at"));
+        cliente.setUpdatedAt(rs.getTimestamp("updated_at"));
         int idPedidoActivo = rs.getInt("id_pedido_activo");
         if (!rs.wasNull()) {
             Pedido pedido = new Pedido();
@@ -200,7 +201,7 @@ public class ClienteDAOImpl implements ClienteDAO {
     @Override
     public Cliente getPorCorreo(Connection con, String correo, String contrasena) throws SQLException {
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo, u.created_at " +
+                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo, u.created_at, u.updated_at " +
                 "FROM Cliente c " +
                 "INNER JOIN Usuario u ON c.id_usuario = u.id_usuario " +
                 "WHERE u.correo = ? AND u.contrasena_hash = ?";
@@ -228,7 +229,7 @@ public class ClienteDAOImpl implements ClienteDAO {
                 .collect(Collectors.joining(","));
 
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo, u.created_at " +
+                "c.telefono, c.fecha_nacimiento, c.id_pedido_activo, u.created_at, u.updated_at " +
                 "FROM Cliente c " +
                 "INNER JOIN Usuario u ON c.id_usuario = u.id_usuario " +
                 "WHERE c.id_usuario IN (" + placeholders + ")";

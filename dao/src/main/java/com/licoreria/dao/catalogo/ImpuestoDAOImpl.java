@@ -66,7 +66,7 @@ public class ImpuestoDAOImpl implements ImpuestoDAO {
 
     @Override
     public void remove(Connection con, Impuesto impuesto) throws SQLException {
-        final String sql = "DELETE FROM  Impuesto FROM  id_impuesto = ?";
+        final String sql = "DELETE FROM Impuesto WHERE id_impuesto = ?";
         DAOUtils.delete(sql,con, (ps)->{
             ps.setInt(1, impuesto.getId());
         });
