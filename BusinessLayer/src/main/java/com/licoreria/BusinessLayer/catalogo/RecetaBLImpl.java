@@ -17,12 +17,14 @@ public class RecetaBLImpl implements RecetaBL {
     private final CategoriaDAO categoriaDAO;
     private final ProductoDAO productoDAO;
     private final MarcaDAO marcaDAO;
+    private final ImagenBL imagenBL;
     public RecetaBLImpl() {
         this.recetaDAO = new RecetaDAOImpl();
         this.imagenDAO = new ImagenDAOImpl();
         this.categoriaDAO = new CategoriaDAOImpl();
         this.productoDAO = new ProductoDAOImpl();
         this.marcaDAO = new MarcaDAOImpl();
+        this.imagenBL = new ImagenBLImpl();
     }
 
     @Override
@@ -174,10 +176,16 @@ public class RecetaBLImpl implements RecetaBL {
             Connection con = TransactionContext.getConnection();
             try {
                 Receta receta = recetaDAO.get(con, id);
+                List<Imagen> imagenes = null;
                 if (receta != null) {
+                    imagenes = imagenDAO.getAllByReceta(con, receta);
                     recetaDAO.remove(con, receta);
                 }
                 TransactionContext.commit();
+                
+                if (imagenes != null && !imagenes.isEmpty()) {
+                    imagenBL.limpiarImagenesHuerfanasAsync();
+                }
             } catch (Exception e) {
                 TransactionContext.rollback();
                 throw e;
@@ -234,6 +242,7 @@ public class RecetaBLImpl implements RecetaBL {
             try {
                 recetaDAO.removerImagen(con, idReceta, idImagen);
                 TransactionContext.commit();
+                imagenBL.limpiarImagenesHuerfanasAsync();
             } catch (SQLException e) {
                 TransactionContext.rollback();
                 throw new RuntimeException(e);

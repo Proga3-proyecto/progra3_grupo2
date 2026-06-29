@@ -15,6 +15,8 @@ import com.licoreria.dominio.Snapshots.RecetaSnapshot;
 import com.licoreria.dominio.carrito.EstadoPedido;
 import com.licoreria.dominio.carrito.Pedido;
 import com.licoreria.dominio.usuarios.Cliente;
+import com.licoreria.BusinessLayer.catalogo.ImagenBL;
+import com.licoreria.BusinessLayer.catalogo.ImagenBLImpl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -115,8 +117,28 @@ public class PedidoBLImpl implements PedidoBL {
                 Pedido pedido = pedidoDAO.get(con, id);
                 if (pedido != null) {
                     pedidoDAO.remove(con, pedido);
+                    
+                    if (pedido.getDetallesProductos() != null) {
+                        for (var detalle : pedido.getDetallesProductos()) {
+                            if (detalle.getProductoSnapshot() != null) {
+                                productoSnapshotDAO.remove(con, detalle.getProductoSnapshot());
+                            }
+                        }
+                    }
+                    if (pedido.getDetallesRecetas() != null) {
+                        for (var detalle : pedido.getDetallesRecetas()) {
+                            if (detalle.getRecetaSnapshot() != null) {
+                                recetaSnapshotDAO.remove(con, detalle.getRecetaSnapshot());
+                            }
+                        }
+                    }
                 }
                 TransactionContext.commit();
+                
+                if (pedido != null && (pedido.getDetallesProductos() != null || pedido.getDetallesRecetas() != null)) {
+                    ImagenBL imagenBL = new ImagenBLImpl();
+                    imagenBL.limpiarImagenesHuerfanasAsync();
+                }
             } catch (Exception e) {
                 TransactionContext.rollback();
                 throw e;

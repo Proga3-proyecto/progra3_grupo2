@@ -33,4 +33,7 @@ public interface ImagenDAO extends BaseDAO<Imagen, Integer> {
             List<Integer> ids
     ) throws SQLException;
 
+    boolean isImagenEnUso(Connection con, int idImagen) throws SQLException;
+    
+    List<Imagen> getImagenesHuerfanas(Connection con) throws SQLException;
 }

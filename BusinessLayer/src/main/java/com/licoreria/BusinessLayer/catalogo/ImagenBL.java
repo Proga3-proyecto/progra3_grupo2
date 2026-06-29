@@ -7,4 +7,6 @@ public interface ImagenBL {
     List<Imagen> getAll();
     Imagen get(int id);
     void delete(Imagen imagen);
+    void checkAndRemoveUnusedImage(int idImagen);
+    void limpiarImagenesHuerfanasAsync();
 }

@@ -247,4 +247,41 @@ public class ImagenDAOImpl implements ImagenDAO {
             return imagen;
         });
     }
+
+    @Override
+    public boolean isImagenEnUso(Connection con, int idImagen) throws SQLException {
+        String sqlProducto = "SELECT 1 FROM ProductoImagen WHERE id_imagen = ?";
+        List<Integer> inProducto = DAOUtils.getAll(sqlProducto, con, (ps) -> ps.setInt(1, idImagen), (rs) -> 1);
+        if (!inProducto.isEmpty()) return true;
+
+        String sqlReceta = "SELECT 1 FROM RecetaImagen WHERE id_imagen = ?";
+        List<Integer> inReceta = DAOUtils.getAll(sqlReceta, con, (ps) -> ps.setInt(1, idImagen), (rs) -> 1);
+        if (!inReceta.isEmpty()) return true;
+
+        String sqlProdSnapshot = "SELECT 1 FROM Producto_Snapshot WHERE id_imagen = ?";
+        List<Integer> inProdSnapshot = DAOUtils.getAll(sqlProdSnapshot, con, (ps) -> ps.setInt(1, idImagen), (rs) -> 1);
+        if (!inProdSnapshot.isEmpty()) return true;
+
+        String sqlRecSnapshot = "SELECT 1 FROM Receta_Snapshot WHERE id_imagen = ?";
+        List<Integer> inRecSnapshot = DAOUtils.getAll(sqlRecSnapshot, con, (ps) -> ps.setInt(1, idImagen), (rs) -> 1);
+        if (!inRecSnapshot.isEmpty()) return true;
+
+        return false;
+    }
+
+    @Override
+    public List<Imagen> getImagenesHuerfanas(Connection con) throws SQLException {
+        final String sql = "SELECT i.id_imagen, i.url FROM Imagen i " +
+                "WHERE i.id_imagen NOT IN (SELECT id_imagen FROM ProductoImagen WHERE id_imagen IS NOT NULL) " +
+                "AND i.id_imagen NOT IN (SELECT id_imagen FROM RecetaImagen WHERE id_imagen IS NOT NULL) " +
+                "AND i.id_imagen NOT IN (SELECT id_imagen FROM Producto_Snapshot WHERE id_imagen IS NOT NULL) " +
+                "AND i.id_imagen NOT IN (SELECT id_imagen FROM Receta_Snapshot WHERE id_imagen IS NOT NULL)";
+
+        return DAOUtils.getAll(sql, con, (rs) -> {
+            Imagen imagen = new Imagen();
+            imagen.setId(rs.getInt("id_imagen"));
+            imagen.setUrl(rs.getString("url"));
+            return imagen;
+        });
+    }
 }

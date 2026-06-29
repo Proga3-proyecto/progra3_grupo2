@@ -19,12 +19,14 @@ public class ProductoBLImpl implements ProductoBL {
     MarcaDAO marcaDAO;
     CategoriaDAO categoriaDAO;
     ImagenDAO imagenDAO;
+    ImagenBL imagenBL;
 
     public ProductoBLImpl() {
         productoDAO = new ProductoDAOImpl();
         marcaDAO = new MarcaDAOImpl();
         categoriaDAO = new CategoriaDAOImpl();
         imagenDAO = new ImagenDAOImpl();
+        imagenBL = new ImagenBLImpl();
     }
 
     @Override
@@ -92,6 +94,10 @@ public class ProductoBLImpl implements ProductoBL {
                 
                 productoDAO.remove(con, producto);
                 TransactionContext.commit();
+
+                if (imagenes != null && !imagenes.isEmpty()) {
+                    imagenBL.limpiarImagenesHuerfanasAsync();
+                }
             } catch (SQLException e) {
                 TransactionContext.rollback();
                 throw new RuntimeException(e);
@@ -244,6 +250,7 @@ public class ProductoBLImpl implements ProductoBL {
             try {
                 productoDAO.removerImagen(con, idProducto, idImagen);
                 TransactionContext.commit();
+                imagenBL.limpiarImagenesHuerfanasAsync();
             } catch (SQLException e) {
                 TransactionContext.rollback();
                 throw new RuntimeException(e);
