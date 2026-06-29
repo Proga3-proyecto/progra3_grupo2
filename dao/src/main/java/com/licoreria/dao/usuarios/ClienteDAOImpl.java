@@ -131,7 +131,12 @@ public class ClienteDAOImpl implements ClienteDAO {
     public void remove(Connection con, Cliente cliente) throws SQLException {
         eliminarDirecciones(con, cliente.getIdUsuario());
         final String sql = "DELETE FROM Usuario WHERE id_usuario = ?";
+        final String sql1 = "DELETE FROM Cliente WHERE id_usuario = ?";
+        DAOUtils.delete(sql1, con, (ps) -> ps.setInt(1, cliente.getIdUsuario()));
         DAOUtils.delete(sql, con, (ps) -> ps.setInt(1, cliente.getIdUsuario()));
+
+
+
     }
 
 
