@@ -6,6 +6,7 @@ import com.licoreria.dao.catalogo.*;
 import com.licoreria.dominio.catalogo.*;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -189,7 +190,7 @@ public class RecetaBLImpl implements RecetaBL {
     }
 
     @Override
-    public void agregarImagen(Receta receta, String url) {
+    public Imagen agregarImagen(Receta receta, String url) {
         Imagen imagen = new Imagen(url);
         try (Connection con = TransactionContext.getConnection()) {
             Imagen imageDB = imagenDAO.get(con, url);
@@ -197,11 +198,53 @@ public class RecetaBLImpl implements RecetaBL {
 
             recetaDAO.cargarImagen(con, receta, imageDB);
             TransactionContext.commit();
+            return imageDB;
         } catch (Exception e) {
             TransactionContext.rollback();
             throw new RuntimeException("Error al agregar imagen", e);
         }
     }
+
+    @Override
+    public void agregarImagenPrincipal(Receta receta, int idImagen) {
+        try {
+            Connection con = TransactionContext.getConnection();
+            try {
+                Imagen imagen = imagenDAO.get(con, idImagen);
+                if (imagen == null) {
+                    throw new RuntimeException("La imagen no esta cargada");
+                }
+                recetaDAO.asignarImagenPrincipal(con, receta, imagen);
+                TransactionContext.commit();
+            } catch (SQLException e) {
+                TransactionContext.rollback();
+                throw new RuntimeException(e);
+            } finally {
+                TransactionContext.close();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void removerImagen(int idReceta, int idImagen) {
+        try {
+            Connection con = TransactionContext.getConnection();
+            try {
+                recetaDAO.removerImagen(con, idReceta, idImagen);
+                TransactionContext.commit();
+            } catch (SQLException e) {
+                TransactionContext.rollback();
+                throw new RuntimeException(e);
+            } finally {
+                TransactionContext.close();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void agregarCategoria(Receta receta, Categoria categoria) {
         try (Connection con = TransactionContext.getConnection()) {

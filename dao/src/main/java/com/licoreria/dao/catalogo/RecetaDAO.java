@@ -23,5 +23,5 @@ public interface RecetaDAO extends BaseDAO<Receta, Integer> {
 
     Map<Integer, Receta> getMapByIds(Connection con, List<Integer> idsRecetas) throws SQLException;
 
-
+    void removerImagen(Connection con, int idReceta, int idImagen) throws SQLException;
 }

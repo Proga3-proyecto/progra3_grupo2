@@ -232,7 +232,7 @@ public class ImagenDAOImpl implements ImagenDAO {
 
     @Override
     public List<Imagen> getAllByReceta(Connection con, Receta receta) throws SQLException {
-        final String sql = "SELECT i.id_imagen, i.url " +
+        final String sql = "SELECT i.id_imagen, i.url, ri.principal " +
                 "FROM RecetaImagen ri " +
                 "INNER JOIN Imagen i ON ri.id_imagen = i.id_imagen " +
                 "WHERE ri.id_receta = ?";
@@ -243,6 +243,7 @@ public class ImagenDAOImpl implements ImagenDAO {
             Imagen imagen = new Imagen();
             imagen.setId(rs.getInt("id_imagen"));
             imagen.setUrl(rs.getString("url"));
+            imagen.setPrincipal(rs.getBoolean("principal"));
             return imagen;
         });
     }

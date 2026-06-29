@@ -1,6 +1,7 @@
 package com.licoreria.BusinessLayer.catalogo;
 
 import com.licoreria.dominio.catalogo.Categoria;
+import com.licoreria.dominio.catalogo.Imagen;
 import com.licoreria.dominio.catalogo.Receta;
 
 import java.util.List;
@@ -16,7 +17,11 @@ public interface RecetaBL {
 
     void delete(int id);
 
-    void agregarImagen(Receta receta, String url);
+    Imagen agregarImagen(Receta receta, String url);
+
+    void agregarImagenPrincipal(Receta receta, int idImagen);
+
+    void removerImagen(int idReceta, int idImagen);
 
     void agregarCategoria(Receta receta, Categoria categoria);
 
