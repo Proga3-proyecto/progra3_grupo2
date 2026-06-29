@@ -68,7 +68,7 @@ public class ImagenBLImpl implements ImagenBL {
 
     @Override
     public void limpiarImagenesHuerfanasAsync() {
-        CompletableFuture.runAsync(() -> {
+        //CompletableFuture.runAsync(() -> {
             try (Connection con = DBManager.getInstance().getConnection()) {
                 List<Imagen> huerfanas = imagenDAO.getImagenesHuerfanas(con);
                 if (huerfanas != null && !huerfanas.isEmpty()) {
@@ -91,6 +91,6 @@ public class ImagenBLImpl implements ImagenBL {
             } catch (Exception e) {
                 System.err.println("Error running async image cleanup: " + e.getMessage());
             }
-        });
+       // });
     }
 }

@@ -49,7 +49,13 @@ public class SupabaseDriver {
     }
 
     public String upload(String fileName, InputStream fileStream) throws Exception {
-        String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
+        String extension = "";
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex > 0) {
+            extension = fileName.substring(dotIndex);
+        }
+        String randomFileName = java.util.UUID.randomUUID().toString() + extension;
+        String encodedFileName = URLEncoder.encode(randomFileName, StandardCharsets.UTF_8).replace("+", "%20");
         String path = bucket + "/" + encodedFileName;
 
         HttpRequest request = HttpRequest.newBuilder()
