@@ -13,7 +13,7 @@ public class AdminDAOImpl implements AdminDAO {
     @Override
     public Admin get(Connection con, Integer id) throws SQLException {
         final String sql = "SELECT u.id_usuario, u.dni, u.nombre, u.apellido_completo, u.correo, u.contrasena_hash, u.estado, " +
-                "a.fecha_inicio_admin, a.is_master, u.created_at" +
+                "a.fecha_inicio_admin, a.is_master, u.created_at " +
                 "FROM Admin a " +
                 "INNER JOIN Usuario u ON a.id_usuario = u.id_usuario " +
                 "WHERE a.id_usuario = ?";
@@ -83,6 +83,11 @@ public class AdminDAOImpl implements AdminDAO {
 
     @Override
     public void remove(Connection con, Admin admin) throws SQLException {
+        final String sqlAdmin = "DELETE FROM Admin WHERE id_usuario = ?";
+        DAOUtils.delete(sqlAdmin, con, (ps) -> {
+            ps.setInt(1, admin.getIdUsuario());
+        });
+
         final String sql = "DELETE FROM Usuario WHERE id_usuario = ?";
         DAOUtils.delete(sql, con, (ps) -> {
             ps.setInt(1, admin.getIdUsuario());
