@@ -207,6 +207,19 @@ public class ClienteBLImpl implements ClienteBL {
                     throw new RuntimeException("El producto no existe");
                 }
 
+                // Verificar stock actual sumando lo que ya está en el carrito
+                int cantidadEnCarrito = 0;
+                List<DetalleProducto> carrito = clienteDAO.getDetalleProductos(con, idCliente);
+                for (DetalleProducto dp : carrito) {
+                    if (dp.getProducto().getId().equals(idProducto)) {
+                        cantidadEnCarrito = dp.getCantidad();
+                        break;
+                    }
+                }
+                if (cantidadEnCarrito + cantidad > producto.getStock()) {
+                    throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre());
+                }
+
                 double descuentoUnidad = producto.getDescuento();
                 double precioUnidad = producto.getPrecioFinal(); // o getPrecio() dependiendo del requerimiento
 
@@ -235,6 +248,27 @@ public class ClienteBLImpl implements ClienteBL {
                 Receta receta = recetaDAO.get(con, idReceta);
                 if (receta == null) {
                     throw new RuntimeException("La receta no existe");
+                }
+
+                // Verificar stock para los productos de la receta
+                int cantidadEnCarrito = 0;
+                List<DetalleReceta> carritoRecetas = clienteDAO.getDetalleReceta(con, idCliente);
+                for (DetalleReceta dr : carritoRecetas) {
+                    if (dr.getReceta().getId().equals(idReceta)) {
+                        cantidadEnCarrito = dr.getCantidad();
+                        break;
+                    }
+                }
+                int totalDeseado = cantidadEnCarrito + cantidad;
+
+                for (ElementoReceta elemento : receta.getElementos()) {
+                    Producto dbProd = productoDAO.get(con, elemento.getProducto().getId());
+                    if (dbProd != null) {
+                        int requerida = (int) Math.ceil(elemento.getCantidad() * totalDeseado);
+                        if (requerida > dbProd.getStock()) {
+                            throw new RuntimeException("Stock insuficiente para el ingrediente: " + dbProd.getNombre() + " de la receta");
+                        }
+                    }
                 }
 
                 double descuentoUnidad = receta.getDescuento();
@@ -303,6 +337,10 @@ public class ClienteBLImpl implements ClienteBL {
                     throw new RuntimeException("El producto no existe");
                 }
 
+                if (cantidad > producto.getStock()) {
+                    throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre());
+                }
+
                 double descuentoUnidad = producto.getDescuento();
                 double precioUnidad = producto.getPrecioFinal();
 
@@ -331,6 +369,16 @@ public class ClienteBLImpl implements ClienteBL {
                 Receta receta = recetaDAO.get(con, idReceta);
                 if (receta == null) {
                     throw new RuntimeException("La receta no existe");
+                }
+
+                for (ElementoReceta elemento : receta.getElementos()) {
+                    Producto dbProd = productoDAO.get(con, elemento.getProducto().getId());
+                    if (dbProd != null) {
+                        int requerida = (int) Math.ceil(elemento.getCantidad() * cantidad);
+                        if (requerida > dbProd.getStock()) {
+                            throw new RuntimeException("Stock insuficiente para el ingrediente: " + dbProd.getNombre() + " de la receta");
+                        }
+                    }
                 }
 
                 double descuentoUnidad = receta.getDescuento();

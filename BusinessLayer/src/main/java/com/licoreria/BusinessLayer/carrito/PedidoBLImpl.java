@@ -17,6 +17,15 @@ import com.licoreria.dominio.carrito.Pedido;
 import com.licoreria.dominio.usuarios.Cliente;
 import com.licoreria.BusinessLayer.catalogo.ImagenBL;
 import com.licoreria.BusinessLayer.catalogo.ImagenBLImpl;
+import com.licoreria.dao.catalogo.ProductoDAO;
+import com.licoreria.dao.catalogo.ProductoDAOImpl;
+import com.licoreria.dao.catalogo.RecetaDAO;
+import com.licoreria.dao.catalogo.RecetaDAOImpl;
+import com.licoreria.dominio.catalogo.Producto;
+import com.licoreria.dominio.catalogo.Receta;
+import com.licoreria.dominio.catalogo.ElementoReceta;
+import com.licoreria.dominio.carrito.PedidoDetalleProducto;
+import com.licoreria.dominio.carrito.PedidoDetalleReceta;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -34,12 +43,16 @@ public class PedidoBLImpl implements PedidoBL {
     private final ClienteDAO clienteDAO;
     private final ProductoSnapshotDAO productoSnapshotDAO;
     private final RecetaSnapshotDAO recetaSnapshotDAO;
+    private final ProductoDAO productoDAO;
+    private final RecetaDAO recetaDAO;
 
     public PedidoBLImpl() {
         this.pedidoDAO = new PedidoDAOImpl();
         this.clienteDAO = new ClienteDAOImpl();
         this.productoSnapshotDAO = new ProductoSnapshotDAOImpl();
         this.recetaSnapshotDAO = new RecetaSnapshotDAOImpl();
+        this.productoDAO = new ProductoDAOImpl();
+        this.recetaDAO = new RecetaDAOImpl();
     }
 
     @Override
@@ -74,6 +87,46 @@ public class PedidoBLImpl implements PedidoBL {
             try {
                 if (pedido.getEstado() == null) {
                     pedido.setEstado(EstadoPedido.PENDIENTE);
+                }
+
+                // Validar y descontar stock para productos
+                if (pedido.getDetallesProductos() != null) {
+                    for (PedidoDetalleProducto detalle : pedido.getDetallesProductos()) {
+                        Producto prodOriginal = detalle.getProductoSnapshot().getProductoOriginal();
+                        if (prodOriginal != null) {
+                            Producto dbProd = productoDAO.get(con, prodOriginal.getId());
+                            if (dbProd != null) {
+                                if (dbProd.getStock() < detalle.getCantidad()) {
+                                    throw new RuntimeException("Stock insuficiente para el producto: " + dbProd.getNombre());
+                                }
+                                dbProd.setStock(dbProd.getStock() - detalle.getCantidad());
+                                productoDAO.update(con, dbProd);
+                            }
+                        }
+                    }
+                }
+
+                // Validar y descontar stock para recetas
+                if (pedido.getDetallesRecetas() != null) {
+                    for (PedidoDetalleReceta detalle : pedido.getDetallesRecetas()) {
+                        RecetaSnapshot rs = detalle.getRecetaSnapshot();
+                        if (rs != null && rs.getRecetaOriginal() != null) {
+                            Receta receta = recetaDAO.get(con, rs.getRecetaOriginal().getId());
+                            if (receta != null) {
+                                for (ElementoReceta elemento : receta.getElementos()) {
+                                    Producto dbProd = productoDAO.get(con, elemento.getProducto().getId());
+                                    if (dbProd != null) {
+                                        int requerida = (int) Math.ceil(elemento.getCantidad() * detalle.getCantidad());
+                                        if (dbProd.getStock() < requerida) {
+                                            throw new RuntimeException("Stock insuficiente para el ingrediente: " + dbProd.getNombre() + " de la receta");
+                                        }
+                                        dbProd.setStock(dbProd.getStock() - requerida);
+                                        productoDAO.update(con, dbProd);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 pedidoDAO.save(con, pedido);
