@@ -224,10 +224,30 @@ public class PedidoDAOImpl implements PedidoDAO {
     }
 
     private void preparerDeclaration(PreparedStatement ps, Pedido pedido) throws SQLException {
-        ps.setInt(1, pedido.getCliente().getIdUsuario());
-        ps.setDate(2, new java.sql.Date(pedido.getFechaPedido().getTime()));
-        ps.setTime(3, new java.sql.Time(pedido.getHoraInicio().getTime()));
-        ps.setTime(4, new java.sql.Time(pedido.getHoraFin().getTime()));
+        if (pedido.getCliente() != null && pedido.getCliente().getIdUsuario() != null) {
+            ps.setInt(1, pedido.getCliente().getIdUsuario());
+        } else {
+            ps.setNull(1, java.sql.Types.INTEGER);
+        }
+
+        if (pedido.getFechaPedido() != null) {
+            ps.setDate(2, new java.sql.Date(pedido.getFechaPedido().getTime()));
+        } else {
+            ps.setNull(2, java.sql.Types.DATE);
+        }
+
+        if (pedido.getHoraInicio() != null) {
+            ps.setTime(3, new java.sql.Time(pedido.getHoraInicio().getTime()));
+        } else {
+            ps.setNull(3, java.sql.Types.TIME);
+        }
+
+        if (pedido.getHoraFin() != null) {
+            ps.setTime(4, new java.sql.Time(pedido.getHoraFin().getTime()));
+        } else {
+            ps.setNull(4, java.sql.Types.TIME);
+        }
+
         ps.setDouble(5, pedido.getPrecioTotal());
         ps.setDouble(6, pedido.getTotalImpuestos());
         ps.setDouble(7, pedido.getPrecioDelivery());
