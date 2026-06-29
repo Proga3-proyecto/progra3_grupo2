@@ -141,7 +141,6 @@ public class ProductosRS {
 
     @PUT
     @Path("/{id}/imagenPrincipal/{idImagen}")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response asignarImagenPrincipal(@PathParam("id") int id, @PathParam("idImagen") int idImagen) {
         Producto producto = productoBO.get(id);
         if (producto == null) {

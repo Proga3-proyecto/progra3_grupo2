@@ -90,7 +90,7 @@ public class ImagenDAOImpl implements ImagenDAO {
 
     @Override
     public List<Imagen> getAllByProduct(Connection con, Producto producto) throws SQLException {
-        final String sql = "SELECT i.id_imagen, i.url " +
+        final String sql = "SELECT i.id_imagen, i.url, pi.principal " +
                 "FROM ProductoImagen pi " +
                 "INNER JOIN Imagen i ON pi.id_imagen = i.id_imagen " +
                 "WHERE pi.id_producto = ?";
@@ -100,6 +100,7 @@ public class ImagenDAOImpl implements ImagenDAO {
             Imagen imagen = new Imagen();
             imagen.setId(rs.getInt("id_imagen"));
             imagen.setUrl(rs.getString("url"));
+            imagen.setPrincipal(rs.getBoolean("principal"));
             return imagen;
         });
     }
@@ -119,7 +120,7 @@ public class ImagenDAOImpl implements ImagenDAO {
                 .collect(Collectors.joining(","));
 
         String sql =
-                "SELECT pi.id_producto, i.id_imagen, i.url " +
+                "SELECT pi.id_producto, i.id_imagen, i.url, pi.principal " +
                         "FROM ProductoImagen pi " +
                         "INNER JOIN Imagen i ON pi.id_imagen = i.id_imagen " +
                         "WHERE pi.id_producto IN (" + placeholders + ")";
@@ -142,6 +143,7 @@ public class ImagenDAOImpl implements ImagenDAO {
                     Imagen imagen = new Imagen();
                     imagen.setId(rs.getInt("id_imagen"));
                     imagen.setUrl(rs.getString("url"));
+                    imagen.setPrincipal(rs.getBoolean("principal"));
 
                     resultado
                             .computeIfAbsent(idProducto, k -> new ArrayList<>())
@@ -168,7 +170,7 @@ public class ImagenDAOImpl implements ImagenDAO {
                 .collect(Collectors.joining(","));
 
         // CORREGIDO: Se agregó ri.id_receta al SELECT
-        String sql = "SELECT ri.id_receta, i.id_imagen, i.url " +
+        String sql = "SELECT ri.id_receta, i.id_imagen, i.url, ri.principal " +
                 "FROM RecetaImagen ri " +
                 "INNER JOIN Imagen i ON ri.id_imagen = i.id_imagen " +
                 "WHERE ri.id_receta IN (" + placeholders + ")";
@@ -191,6 +193,7 @@ public class ImagenDAOImpl implements ImagenDAO {
                     Imagen imagen = new Imagen();
                     imagen.setId(rs.getInt("id_imagen"));
                     imagen.setUrl(rs.getString("url"));
+                    imagen.setPrincipal(rs.getBoolean("principal"));
 
                     resultado
                             .computeIfAbsent(idReceta, k -> new ArrayList<>())
