@@ -4,7 +4,7 @@ public class AlcoholImpuesto {
     private Integer id;
     private Integer minimo;
     private Integer maximo;
-    private Integer porcentajePrecio;
+
     private double valor;
 
 
@@ -22,13 +22,7 @@ public class AlcoholImpuesto {
         this.valor = valor;
     }
 
-    public Integer getPorcentajePrecio() {
-        return porcentajePrecio;
-    }
 
-    public void setPorcentajePrecio(Integer porcentajePrecio) {
-        this.porcentajePrecio = porcentajePrecio;
-    }
 
     public Integer getMaximo() {
         return maximo;

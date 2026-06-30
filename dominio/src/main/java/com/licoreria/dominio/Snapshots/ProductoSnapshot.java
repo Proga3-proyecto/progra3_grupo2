@@ -23,7 +23,7 @@ public class ProductoSnapshot {
     private double porcentajeImpuesto;
     private TipoImpuesto tipoImpuesto;
 
-    private Integer porcentajePrecioAlcoholHistorico;
+
     private Double valorImpuestoAlcoholHistorico;
     private Imagen imagen;
 
@@ -67,10 +67,8 @@ public class ProductoSnapshot {
             }
 
             if (producto.getImpuestoAlcohol() != null) {
-                this.porcentajePrecioAlcoholHistorico = producto.getImpuestoAlcohol().getPorcentajePrecio();
                 this.valorImpuestoAlcoholHistorico = producto.getImpuestoAlcohol().getValor();
             } else {
-                this.porcentajePrecioAlcoholHistorico = 0;
                 this.valorImpuestoAlcoholHistorico = 0.0;
             }
 
@@ -181,13 +179,7 @@ public class ProductoSnapshot {
         this.tipoImpuesto = tipoImpuesto;
     }
 
-    public Integer getPorcentajePrecioAlcoholHistorico() {
-        return porcentajePrecioAlcoholHistorico;
-    }
 
-    public void setPorcentajePrecioAlcoholHistorico(Integer porcentajePrecioAlcoholHistorico) {
-        this.porcentajePrecioAlcoholHistorico = porcentajePrecioAlcoholHistorico;
-    }
 
     public Double getValorImpuestoAlcoholHistorico() {
         return valorImpuestoAlcoholHistorico;

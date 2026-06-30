@@ -22,7 +22,7 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
     public ProductoSnapshot get(Connection con, Integer id) throws SQLException {
         final String sql = "SELECT ps.id_producto_snapshot, ps.id_producto_original, ps.nombre, ps.precio_venta, " +
                 "ps.precio_final_venta, ps.descuento_applied, ps.volumen_litros, ps.porcentaje_alcohol, ps.nombre_marca, " +
-                "ps.nombre_impuesto, ps.porcentaje_impuesto, ps.tipo_impuesto, ps.porcentaje_precio_alcohol_historico, " +
+                "ps.nombre_impuesto, ps.porcentaje_impuesto, ps.tipo_impuesto, " +
                 "ps.valor_impuesto_alcohol_historico, ps.id_imagen, i.url AS imagen_url " +
                 "FROM Producto_Snapshot ps " +
                 "LEFT JOIN Imagen i ON ps.id_imagen = i.id_imagen " +
@@ -40,7 +40,7 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
     public List<ProductoSnapshot> getAll(Connection con) throws SQLException {
         final String sql = "SELECT ps.id_producto_snapshot, ps.id_producto_original, ps.nombre, ps.precio_venta, " +
                 "ps.precio_final_venta, ps.descuento_applied, ps.volumen_litros, ps.porcentaje_alcohol, ps.nombre_marca, " +
-                "ps.nombre_impuesto, ps.porcentaje_impuesto, ps.tipo_impuesto, ps.porcentaje_precio_alcohol_historico, " +
+                "ps.nombre_impuesto, ps.porcentaje_impuesto, ps.tipo_impuesto, " +
                 "ps.valor_impuesto_alcohol_historico, ps.id_imagen, i.url AS imagen_url " +
                 "FROM Producto_Snapshot ps " +
                 "LEFT JOIN Imagen i ON ps.id_imagen = i.id_imagen";
@@ -57,8 +57,8 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
     public ProductoSnapshot save(Connection con, ProductoSnapshot snapshot) throws SQLException {
         final String sql = "INSERT INTO Producto_Snapshot (id_producto_original, nombre, precio_venta, " +
                 "precio_final_venta, descuento_applied, volumen_litros, porcentaje_alcohol, nombre_marca, " +
-                "nombre_impuesto, porcentaje_impuesto, tipo_impuesto, porcentaje_precio_alcohol_historico, " +
-                "valor_impuesto_alcohol_historico, id_imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "nombre_impuesto, porcentaje_impuesto, tipo_impuesto, " +
+                "valor_impuesto_alcohol_historico, id_imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         DAOUtils.save(sql, con, (ps) -> prepararDeclaracion(ps, snapshot), (rs) -> snapshot.setId(rs.getInt(1)));
 
@@ -73,12 +73,12 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
         final String sql = "UPDATE Producto_Snapshot SET id_producto_original = ?, nombre = ?, precio_venta = ?, " +
                 "precio_final_venta = ?, descuento_applied = ?, volumen_litros = ?, porcentaje_alcohol = ?, " +
                 "nombre_marca = ?, nombre_impuesto = ?, porcentaje_impuesto = ?, tipo_impuesto = ?, " +
-                "porcentaje_precio_alcohol_historico = ?, valor_impuesto_alcohol_historico = ?, id_imagen = ? " +
+                "valor_impuesto_alcohol_historico = ?, id_imagen = ? " +
                 "WHERE id_producto_snapshot = ?";
 
         DAOUtils.update(sql, con, (ps) -> {
             prepararDeclaracion(ps, snapshot);
-            ps.setInt(15, snapshot.getId());
+            ps.setInt(14, snapshot.getId());
         });
 
         eliminarCategorias(con, snapshot.getId());
@@ -103,7 +103,7 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
         String placeholders = idsSnapshots.stream().map(id -> "?").collect(Collectors.joining(","));
         String sql = "SELECT ps.id_producto_snapshot, ps.id_producto_original, ps.nombre, ps.precio_venta, " +
                 "ps.precio_final_venta, ps.descuento_applied, ps.volumen_litros, ps.porcentaje_alcohol, ps.nombre_marca, " +
-                "ps.nombre_impuesto, ps.porcentaje_impuesto, ps.tipo_impuesto, ps.porcentaje_precio_alcohol_historico, " +
+                "ps.nombre_impuesto, ps.porcentaje_impuesto, ps.tipo_impuesto, " +
                 "ps.valor_impuesto_alcohol_historico, ps.id_imagen, i.url AS imagen_url " +
                 "FROM Producto_Snapshot ps " +
                 "LEFT JOIN Imagen i ON ps.id_imagen = i.id_imagen " +
@@ -177,7 +177,6 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
         snapshot.setNombreImpuesto(rs.getString("nombre_impuesto"));
         snapshot.setPorcentajeImpuesto(rs.getDouble("porcentaje_impuesto"));
         snapshot.setTipoImpuesto(TipoImpuesto.valueOf(rs.getString("tipo_impuesto")));
-        snapshot.setPorcentajePrecioAlcoholHistorico(rs.getInt("porcentaje_precio_alcohol_historico"));
         snapshot.setValorImpuestoAlcoholHistorico(rs.getDouble("valor_impuesto_alcohol_historico"));
 
         // Mapeo de la imagen si existe
@@ -210,22 +209,16 @@ public class ProductoSnapshotDAOImpl implements ProductoSnapshotDAO {
         ps.setDouble(10, snapshot.getPorcentajeImpuesto());
         ps.setString(11, snapshot.getTipoImpuesto().name());
 
-        if (snapshot.getPorcentajePrecioAlcoholHistorico() != null) {
-            ps.setInt(12, snapshot.getPorcentajePrecioAlcoholHistorico());
-        } else {
-            ps.setInt(12, 0);
-        }
-
         if (snapshot.getValorImpuestoAlcoholHistorico() != null) {
-            ps.setDouble(13, snapshot.getValorImpuestoAlcoholHistorico());
+            ps.setDouble(12, snapshot.getValorImpuestoAlcoholHistorico());
         } else {
-            ps.setDouble(13, 0.0);
+            ps.setDouble(12, 0.0);
         }
 
         if (snapshot.getImagen() != null && snapshot.getImagen().getId() != null) {
-            ps.setInt(14, snapshot.getImagen().getId());
+            ps.setInt(13, snapshot.getImagen().getId());
         } else {
-            ps.setNull(14, Types.INTEGER);
+            ps.setNull(13, Types.INTEGER);
         }
     }
 }
